@@ -1,0 +1,27 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dependencies (if added later)
+node_modules/
+
+# Local data (user's personal items)
+# data/items.json  # Uncomment if you want to exclude personal data
+
+# Environment
+.env
+.env.local
+
+# Build output (if added later)
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*

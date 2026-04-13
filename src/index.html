@@ -1,0 +1,2401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="座.png">
+  <link rel="apple-touch-icon" href="座.png">
+  <title>座 HEAD MAP</title>
+  <style>
+    :root {
+      --bg: #080b14;
+      --bg-card: #0e1120;
+      --bg-modal: #12162a;
+      --self-color: #5B8FFF;
+      --other-color: #D4A855;
+      --text: #e8e8f0;
+      --text-muted: #8888aa;
+      --border: #1a1d2e;
+
+      /* Calmer color palette - less aggressive reds */
+      --fire: #E89B7B;      /* Warm coral instead of aggressive red */
+      --design: #8AADFF;
+      --quick: #7BC99B;     /* Softer green */
+      --epoche: #AAAACC;
+      --watch: #E8C07B;     /* Warm gold */
+      --monitor: #70B0FF;
+      --delegate: #7BC9B0;
+      --seed: #888888;
+
+      --danger: #D48B6B;    /* Muted coral */
+      --success: #7BC99B;
+
+      /* Background image */
+      --bg-image: url('座と興.jpeg');
+      --bg-size: 60%;       /* Smaller background */
+      --bg-opacity: 0.12;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hiragino Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      position: relative;
+    }
+
+    /* Background image layer */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: var(--bg-size);
+      height: var(--bg-size);
+      background: var(--bg-image) center/contain no-repeat;
+      opacity: var(--bg-opacity);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      background: rgba(8, 11, 20, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-logo img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+
+    .header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.05em; }
+
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+
+    .header-date { color: var(--text-muted); font-size: 0.75rem; }
+
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover { border-color: var(--self-color); background: var(--bg-modal); }
+
+    /* Layer Toggle Tabs */
+    .layer-toggle {
+      display: flex;
+      gap: 0;
+      padding: 12px 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .layer-toggle-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .layer-toggle-btn:first-child { border-radius: 10px 0 0 10px; }
+    .layer-toggle-btn:last-child { border-radius: 0 10px 10px 0; border-left: none; }
+
+    .layer-toggle-btn .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      transition: all 0.3s;
+    }
+
+    .layer-toggle-btn[data-layer="self"] .dot { background: var(--self-color); }
+    .layer-toggle-btn[data-layer="other"] .dot { background: var(--other-color); }
+
+    .layer-toggle-btn.active {
+      color: var(--text);
+      border-color: transparent;
+    }
+
+    .layer-toggle-btn[data-layer="self"].active {
+      background: linear-gradient(135deg, rgba(91, 143, 255, 0.2) 0%, rgba(91, 143, 255, 0.05) 100%);
+      border-color: var(--self-color);
+    }
+
+    .layer-toggle-btn[data-layer="other"].active {
+      background: linear-gradient(135deg, rgba(212, 168, 85, 0.2) 0%, rgba(212, 168, 85, 0.05) 100%);
+      border-color: var(--other-color);
+    }
+
+    /* Matrix Container */
+    .matrix-container {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      perspective: 1200px;
+    }
+
+    .matrix-scene {
+      position: relative;
+      height: 260px;
+      transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Layer Focus States */
+    .matrix-scene[data-focus="self"] { transform: rotateY(0deg); }
+    .matrix-scene[data-focus="other"] { transform: rotateY(12deg); }
+
+    /* Matrix Layer */
+    .matrix-layer {
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      padding: 16px;
+      border-radius: 16px;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    /* Self Layer (Front) */
+    .matrix-layer.self {
+      z-index: 2;
+      background: linear-gradient(135deg, rgba(91, 143, 255, 0.12) 0%, rgba(91, 143, 255, 0.03) 100%);
+      border: 2px solid rgba(91, 143, 255, 0.5);
+      box-shadow: 0 12px 40px rgba(91, 143, 255, 0.2);
+    }
+
+    .matrix-scene[data-focus="self"] .matrix-layer.self {
+      transform: translateZ(60px) translateY(20px);
+      opacity: 1;
+    }
+
+    .matrix-scene[data-focus="other"] .matrix-layer.self {
+      transform: translateZ(-40px) translateY(0) scale(0.88);
+      opacity: 0.5;
+    }
+
+    /* Other Layer (Back - 座 Matrix 間/関係性) */
+    .matrix-layer.other {
+      z-index: 1;
+      background: linear-gradient(135deg, rgba(15, 20, 35, 0.7) 0%, rgba(10, 15, 25, 0.5) 100%);
+      border: 1px solid rgba(212, 168, 85, 0.5);
+      box-shadow: 0 12px 40px rgba(212, 168, 85, 0.2);
+    }
+
+    .matrix-scene[data-focus="self"] .matrix-layer.other {
+      transform: translateZ(-40px) translateY(0) scale(0.88);
+      opacity: 0.5;
+    }
+
+    .matrix-scene[data-focus="other"] .matrix-layer.other {
+      transform: translateZ(60px) translateY(20px);
+      opacity: 1;
+    }
+
+    /* Layer Title */
+    .layer-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .matrix-layer.self .layer-title { color: var(--self-color); }
+    .matrix-layer.other .layer-title { color: var(--other-color); }
+
+    .layer-title .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .matrix-layer.self .layer-title .dot {
+      background: var(--self-color);
+      box-shadow: 0 0 10px var(--self-color);
+    }
+
+    .matrix-layer.other .layer-title .dot {
+      background: var(--other-color);
+      box-shadow: 0 0 12px var(--other-color);
+    }
+
+    .matrix-layer.other .layer-title {
+      text-shadow: 0 0 20px rgba(212, 168, 85, 0.5);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.9); }
+    }
+
+    /* Matrix Structure */
+    .matrix-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Y-Axis */
+    .y-axis {
+      width: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 4px;
+    }
+
+    .y-axis-title {
+      writing-mode: vertical-lr;
+      text-orientation: mixed;
+      font-size: 0.625rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-align: center;
+    }
+
+    .y-axis-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .axis-arrow {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1;
+    }
+
+    .axis-high {
+      font-size: 0.625rem;
+      font-weight: 600;
+      color: var(--fire);
+    }
+
+    /* Matrix Content */
+    .matrix-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* 2x2 Grid */
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 8px;
+      flex: 1;
+    }
+
+    /* X-Axis */
+    .x-axis {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      padding-top: 6px;
+    }
+
+    .x-axis-arrow {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .x-axis-title {
+      font-size: 0.625rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-align: right;
+      padding-top: 2px;
+    }
+
+    /* Matrix Plot Area (Scatter Plot) */
+    .matrix-plot {
+      position: relative;
+      width: 100%;
+      height: 160px;
+      background:
+        linear-gradient(to left, rgba(255,107,107,0.1) 0%, rgba(255,107,107,0.02) 50%, transparent 50%),
+        linear-gradient(to bottom, rgba(255,107,107,0.1) 0%, rgba(255,107,107,0.02) 50%, transparent 50%);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      overflow: visible;
+    }
+
+    /* Dynamic quadrant dividers (positioned by JS) */
+    .quadrant-divider-h {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .quadrant-divider-v {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--border);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Quadrant labels */
+    .quadrant-labels {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      font-size: 0.5rem;
+      color: var(--text-muted);
+      opacity: 0.5;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .quadrant-label {
+      position: absolute;
+      padding: 4px;
+    }
+
+    .quadrant-label.tl { top: 4px; left: 4px; }
+    .quadrant-label.tr { top: 4px; right: 4px; }
+    .quadrant-label.bl { bottom: 4px; left: 4px; }
+    .quadrant-label.br { bottom: 4px; right: 4px; }
+
+    /* 座Matrix specific styles */
+    .matrix-layer.other .matrix-plot {
+      background:
+        linear-gradient(to left, rgba(212, 168, 85, 0.12) 0%, rgba(212, 168, 85, 0.03) 50%, transparent 50%),
+        linear-gradient(to bottom, rgba(212, 168, 85, 0.12) 0%, rgba(212, 168, 85, 0.03) 50%, transparent 50%),
+        rgba(10, 15, 25, 0.4);
+      border-color: rgba(212, 168, 85, 0.3);
+    }
+
+    .matrix-layer.other .quadrant-divider-h,
+    .matrix-layer.other .quadrant-divider-v {
+      background: rgba(212, 168, 85, 0.25);
+    }
+
+    .matrix-layer.other .quadrant-labels {
+      color: var(--other-color);
+      opacity: 0.7;
+    }
+
+    .matrix-layer.other .axis-arrow,
+    .matrix-layer.other .axis-high {
+      color: var(--other-color);
+    }
+
+    /* Project Dots */
+    .project-dot {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1;
+    }
+
+    .project-dot:hover {
+      z-index: 100;
+    }
+
+    .dot-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 6px;
+      border-radius: 6px;
+      background: var(--bg-card);
+      border: 2px solid;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      min-width: 24px;
+      min-height: 24px;
+    }
+
+    .matrix-layer.self .dot-inner { border-color: var(--self-color); }
+    .matrix-layer.other .dot-inner {
+      border-color: var(--other-color);
+      background: rgba(10, 15, 25, 0.85);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .dot-inner.fire { border-color: var(--fire); background: rgba(255, 107, 107, 0.15); }
+    .dot-inner.design { border-color: var(--design); background: rgba(138, 173, 255, 0.15); }
+    .dot-inner.quick { border-color: var(--quick); background: rgba(128, 232, 128, 0.15); }
+    .dot-inner.epoche { border-color: var(--epoche); background: rgba(170, 170, 204, 0.15); }
+    .dot-inner.watch { border-color: var(--watch); background: rgba(255, 184, 112, 0.15); }
+    .dot-inner.monitor { border-color: var(--monitor); background: rgba(112, 176, 255, 0.15); }
+    .dot-inner.delegate { border-color: var(--delegate); background: rgba(128, 232, 184, 0.15); }
+    .dot-inner.seed { border-color: var(--seed); background: rgba(136, 136, 136, 0.15); }
+
+    .dot-emoji {
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+
+    .dot-name {
+      font-size: 0.5rem;
+      font-weight: 600;
+      color: var(--text);
+      max-width: 40px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+      margin-top: 1px;
+    }
+
+    /* Hover expanded state */
+    .project-dot:hover .dot-inner {
+      padding: 8px 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transform: scale(1.3);
+    }
+
+    .project-dot:hover .dot-emoji {
+      font-size: 1.25rem;
+    }
+
+    .project-dot:hover .dot-name {
+      font-size: 0.75rem;
+      max-width: 100px;
+    }
+
+    .dot-details {
+      display: none;
+      margin-top: 4px;
+      font-size: 0.625rem;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 120px;
+    }
+
+    .project-dot:hover .dot-details {
+      display: block;
+    }
+
+    .dot-score {
+      font-size: 0.5rem;
+      color: var(--text-muted);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .project-dot:hover .dot-score {
+      opacity: 1;
+    }
+
+    /* NEW flag for recently created items */
+    .dot-new {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      font-size: 0.4rem;
+      font-weight: 700;
+      background: var(--self-color);
+      color: white;
+      padding: 1px 3px;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+      animation: pulse-new 2s infinite;
+    }
+
+    @keyframes pulse-new {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .badge-new {
+      background: var(--self-color);
+      color: white;
+    }
+
+    /* Empty plot state */
+    .plot-empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    /* Main Content */
+    .main {
+      padding: 0 16px 100px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Layer Divider */
+    .layer-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0 16px;
+    }
+
+    .layer-divider .line { flex: 1; height: 1px; }
+    .layer-divider.self .line { background: linear-gradient(90deg, var(--self-color) 0%, transparent 100%); }
+    .layer-divider.other .line { background: linear-gradient(90deg, var(--other-color) 0%, transparent 100%); }
+    .layer-divider .line:last-child { transform: rotate(180deg); }
+
+    .layer-divider .label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .layer-divider.self .label { color: var(--self-color); }
+    .layer-divider.other .label { color: var(--other-color); }
+
+    /* Status Section */
+    .status-section { margin-bottom: 20px; }
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .status-header-left { display: flex; align-items: center; gap: 8px; }
+    .status-emoji { font-size: 1.125rem; }
+    .status-name { font-weight: 600; font-size: 0.9375rem; }
+
+    .status-count {
+      background: var(--bg-card);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .status-toggle {
+      color: var(--text-muted);
+      transition: transform 0.2s;
+      font-size: 0.75rem;
+    }
+
+    .status-section.collapsed .status-toggle { transform: rotate(-90deg); }
+    .status-section.collapsed .status-items { display: none; }
+
+    /* Cards */
+    .status-items { display: flex; flex-direction: column; gap: 10px; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .card:hover { border-color: var(--text-muted); }
+    .card.self-layer { border-left: 3px solid var(--self-color); }
+    .card.other-layer { border-left: 3px solid var(--other-color); }
+
+    .card-badges { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+
+    .badge {
+      font-size: 0.625rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-status { color: var(--bg); }
+    .badge-status.fire { background: var(--fire); }
+    .badge-status.design { background: var(--design); }
+    .badge-status.quick { background: var(--quick); }
+    .badge-status.epoche { background: var(--epoche); }
+    .badge-status.watch { background: var(--watch); }
+    .badge-status.monitor { background: var(--monitor); }
+    .badge-status.delegate { background: var(--delegate); }
+    .badge-status.seed { background: var(--seed); }
+
+    .badge-priority { border: 1px solid var(--border); color: var(--text-muted); }
+    .badge-priority.high { border-color: var(--fire); color: var(--fire); }
+    .badge-score { border: 1px solid var(--border); color: var(--text-muted); font-family: monospace; }
+
+    .card-title { font-weight: 600; font-size: 0.9375rem; margin-bottom: 10px; line-height: 1.4; }
+
+    .card-person {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      margin-bottom: 6px;
+    }
+
+    .card-next-action {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 0.8125rem;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .card-next-action .arrow { color: var(--self-color); flex-shrink: 0; }
+
+    .card-memo {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--bg);
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      border-left: 2px solid var(--border);
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.6875rem;
+    }
+
+    .card-id { font-family: monospace; }
+
+    /* Empty State */
+    .empty-state { text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.875rem; }
+
+    /* Loading */
+    .loading { text-align: center; padding: 64px; color: var(--text-muted); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+
+    .modal {
+      background: var(--bg-modal);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.active .modal { transform: translateY(0); }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg-modal);
+      z-index: 10;
+    }
+
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+
+    .modal-close {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bg-card);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-body { padding: 20px; }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 0.875rem; color: var(--text-muted); margin-bottom: 8px; }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus { outline: none; border-color: var(--self-color); }
+    .form-input::placeholder { color: var(--text-muted); }
+    textarea.form-input { resize: vertical; min-height: 80px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .radio-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .radio-btn:hover { border-color: var(--text-muted); }
+    .radio-btn.active { background: var(--self-color); border-color: var(--self-color); color: var(--bg); }
+    .radio-btn[data-layer="other"].active { background: var(--other-color); border-color: var(--other-color); }
+
+    .status-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+    .status-btn {
+      padding: 10px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .status-btn:hover { border-color: var(--text-muted); }
+    .status-btn.active { border-width: 2px; }
+
+    .status-btn.active.fire { border-color: var(--fire); background: rgba(255, 107, 107, 0.1); }
+    .status-btn.active.design { border-color: var(--design); background: rgba(138, 173, 255, 0.1); }
+    .status-btn.active.quick { border-color: var(--quick); background: rgba(128, 232, 128, 0.1); }
+    .status-btn.active.epoche { border-color: var(--epoche); background: rgba(170, 170, 204, 0.1); }
+    .status-btn.active.watch { border-color: var(--watch); background: rgba(255, 184, 112, 0.1); }
+    .status-btn.active.monitor { border-color: var(--monitor); background: rgba(112, 176, 255, 0.1); }
+    .status-btn.active.delegate { border-color: var(--delegate); background: rgba(128, 232, 184, 0.1); }
+    .status-btn.active.seed { border-color: var(--seed); background: rgba(136, 136, 136, 0.1); }
+
+    .status-btn .emoji { font-size: 1.25rem; display: block; margin-bottom: 4px; }
+    .status-btn .label { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.03em; }
+
+    .modal-footer { padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 12px; }
+
+    .btn {
+      flex: 1;
+      padding: 14px 20px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary { background: var(--self-color); color: var(--bg); }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--text-muted); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { filter: brightness(1.1); }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--self-color);
+      border: none;
+      color: var(--bg);
+      font-size: 1.75rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(91, 143, 255, 0.4);
+      transition: all 0.2s;
+      z-index: 50;
+    }
+
+    .fab:hover { transform: scale(1.05); box-shadow: 0 6px 24px rgba(91, 143, 255, 0.5); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 100px; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 2000;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.success { border-color: var(--success); }
+    .toast.error { border-color: var(--danger); }
+
+    /* Settings */
+    .settings-section { margin-bottom: 24px; }
+    .settings-title { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .settings-btn {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      font-size: 0.9375rem;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+
+    .settings-btn:hover { border-color: var(--text-muted); }
+    .settings-btn .icon { font-size: 1.25rem; }
+
+    .data-source {
+      font-size: 0.6875rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .data-source.local { border-color: var(--text-muted); color: var(--text-muted); }
+    .data-source.json { border-color: var(--self-color); color: var(--self-color); }
+    .data-source.sheet { border-color: var(--success); color: var(--success); }
+
+    /* Score Input Styles */
+    .score-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .form-range {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border);
+      outline: none;
+    }
+
+    .form-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--self-color);
+      cursor: pointer;
+      border: 2px solid var(--bg);
+      box-shadow: 0 2px 8px rgba(91, 143, 255, 0.4);
+      transition: transform 0.2s;
+    }
+
+    .form-range::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .form-range::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--self-color);
+      cursor: pointer;
+      border: 2px solid var(--bg);
+      box-shadow: 0 2px 8px rgba(91, 143, 255, 0.4);
+    }
+
+    .score-value {
+      min-width: 32px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--self-color);
+    }
+
+    /* Policy Box */
+    .policy-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--self-color);
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .policy-box p {
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .policy-box ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .policy-box li {
+      margin-bottom: 6px;
+    }
+
+    .policy-box strong {
+      color: var(--self-color);
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <div class="header-logo">
+        <img src="座.png" alt="座">
+        <h1>HEAD MAP</h1>
+      </div>
+      <div class="header-actions">
+        <span class="data-source" id="dataSource">-</span>
+        <span class="header-date" id="updateDate"></span>
+        <button class="icon-btn" id="syncSheetBtn" title="スプレッドシートから取得">📊</button>
+        <button class="icon-btn" id="settingsBtn" title="設定">⚙</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Layer Toggle -->
+  <nav class="layer-toggle">
+    <button class="layer-toggle-btn active" data-layer="self">
+      <span class="dot"></span>
+      <span>自分Matrix</span>
+    </button>
+    <button class="layer-toggle-btn" data-layer="other">
+      <span class="dot"></span>
+      <span>座Matrix</span>
+    </button>
+  </nav>
+
+  <!-- Matrix Visualization -->
+  <section class="matrix-container">
+    <div class="matrix-scene" id="matrixScene" data-focus="self">
+      <!-- Other Layer (座 Matrix - 間/関係性) -->
+      <div class="matrix-layer other" id="otherMatrix">
+        <div class="layer-title"><span class="dot"></span> 座 Matrix</div>
+        <div class="matrix-wrapper">
+          <div class="y-axis">
+            <div class="y-axis-arrow">
+              <span class="axis-arrow">↑</span>
+              <span class="axis-high">高</span>
+            </div>
+          </div>
+          <div class="matrix-main">
+            <div class="matrix-plot" id="otherMatrixPlot">
+              <div class="quadrant-labels">
+                <span class="quadrant-label tl">MONITOR</span>
+                <span class="quadrant-label tr">WATCH</span>
+                <span class="quadrant-label bl">SEED</span>
+                <span class="quadrant-label br">DELEGATE</span>
+              </div>
+            </div>
+            <div class="x-axis">
+              <div class="x-axis-arrow">
+                <span class="axis-high">高</span>
+                <span class="axis-arrow">→</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Self Layer (自分 Matrix) -->
+      <div class="matrix-layer self" id="selfMatrix">
+        <div class="layer-title"><span class="dot"></span> 自分 Matrix</div>
+        <div class="matrix-wrapper">
+          <div class="y-axis">
+            <span class="y-axis-title">重要度</span>
+            <div class="y-axis-arrow">
+              <span class="axis-arrow">↑</span>
+              <span class="axis-high">高</span>
+            </div>
+          </div>
+          <div class="matrix-main">
+            <div class="matrix-plot" id="selfMatrixPlot">
+              <div class="quadrant-labels">
+                <span class="quadrant-label tl">DESIGN</span>
+                <span class="quadrant-label tr">FIRE</span>
+                <span class="quadrant-label bl">EPOCHÉ</span>
+                <span class="quadrant-label br">QUICK</span>
+              </div>
+            </div>
+            <div class="x-axis">
+              <div class="x-axis-arrow">
+                <span class="axis-high">高</span>
+                <span class="axis-arrow">→</span>
+              </div>
+              <div class="x-axis-title">緊急度</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="main" id="main">
+    <div class="loading">読み込み中...</div>
+  </main>
+
+  <button class="fab" id="addBtn" title="新規追加">+</button>
+
+  <!-- Item Modal -->
+  <div class="modal-overlay" id="itemModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">新規アイテム</h2>
+        <button class="modal-close" id="modalClose">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">タイトル *</label>
+          <input type="text" class="form-input" id="inputTitle" placeholder="悩み・課題名">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">マトリクス *</label>
+          <div class="radio-group" id="layerGroup">
+            <button class="radio-btn active" data-layer="self">自分Matrix</button>
+            <button class="radio-btn" data-layer="other">座Matrix</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ステータス *</label>
+          <div class="status-grid" id="statusGroup">
+            <button class="status-btn active fire" data-status="FIRE">
+              <span class="emoji">🚨</span>
+              <span class="label">FIRE</span>
+            </button>
+            <button class="status-btn design" data-status="DESIGN">
+              <span class="emoji">🧭</span>
+              <span class="label">DESIGN</span>
+            </button>
+            <button class="status-btn quick" data-status="QUICK">
+              <span class="emoji">⚡</span>
+              <span class="label">QUICK</span>
+            </button>
+            <button class="status-btn epoche" data-status="EPOCHE">
+              <span class="emoji">⚪</span>
+              <span class="label">EPOCHÉ</span>
+            </button>
+            <button class="status-btn watch" data-status="WATCH">
+              <span class="emoji">📡</span>
+              <span class="label">WATCH</span>
+            </button>
+            <button class="status-btn monitor" data-status="MONITOR">
+              <span class="emoji">🔭</span>
+              <span class="label">MONITOR</span>
+            </button>
+            <button class="status-btn delegate" data-status="DELEGATE">
+              <span class="emoji">📬</span>
+              <span class="label">DELEGATE</span>
+            </button>
+            <button class="status-btn seed" data-status="SEED">
+              <span class="emoji">🌱</span>
+              <span class="label">SEED</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ショートネーム（表示用）</label>
+          <input type="text" class="form-input" id="inputShortName" placeholder="6文字以内の略称" maxlength="10">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">重要度 (0-100)</label>
+            <div class="score-input-wrap">
+              <input type="range" class="form-range" id="inputImportance" min="0" max="100" value="50">
+              <span class="score-value" id="importanceValue">50</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">緊急度 (0-100)</label>
+            <div class="score-input-wrap">
+              <input type="range" class="form-range" id="inputUrgency" min="0" max="100" value="50">
+              <span class="score-value" id="urgencyValue">50</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">関係者</label>
+          <input type="text" class="form-input" id="inputPerson" placeholder="担当者・関係者名">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">次のアクション</label>
+          <input type="text" class="form-input" id="inputNextAction" placeholder="次の一手">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">メモ</label>
+          <textarea class="form-input" id="inputMemo" placeholder="補足・エポケー理由など"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="deleteBtn" style="display: none;">削除</button>
+        <button class="btn btn-secondary" id="cancelBtn">キャンセル</button>
+        <button class="btn btn-primary" id="saveBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">設定</h2>
+        <button class="modal-close" id="settingsClose">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-section">
+          <div class="settings-title">データ管理</div>
+          <button class="settings-btn" id="exportBtn">
+            <span class="icon">📤</span>
+            <span>JSONエクスポート</span>
+          </button>
+          <button class="settings-btn" id="importBtn">
+            <span class="icon">📥</span>
+            <span>JSONインポート</span>
+          </button>
+          <input type="file" id="importFile" accept=".json" style="display: none;">
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">データソース</div>
+          <button class="settings-btn" id="reloadJsonBtn">
+            <span class="icon">🔄</span>
+            <span>items.jsonから再読み込み</span>
+          </button>
+          <button class="settings-btn" id="clearLocalBtn">
+            <span class="icon">🗑</span>
+            <span>ローカルデータをクリア</span>
+          </button>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">スプレッドシート連携</div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <input type="text" class="form-input" id="sheetUrl" placeholder="Google スプレッドシートのURL">
+          </div>
+          <button class="settings-btn" id="fetchSheetBtn">
+            <span class="icon">📥</span>
+            <span>スプレッドシートから取得</span>
+          </button>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">
+            ※ スプレッドシートは「リンクを知っている全員が閲覧可能」に設定してください<br>
+            ※ ヘッダー行: ID, title, shortName, layer, status, 重要度, 緊急度, person, nextAction, memo
+          </p>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">スプレッドシート書き戻し（GAS）</div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <input type="text" class="form-input" id="gasUrl" placeholder="GAS WebアプリのURL">
+          </div>
+          <button class="settings-btn" id="pushToSheetBtn">
+            <span class="icon">📤</span>
+            <span>スプレッドシートへ書き戻し</span>
+          </button>
+          <button class="settings-btn" id="testGasBtn">
+            <span class="icon">🔗</span>
+            <span>GAS接続テスト</span>
+          </button>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">
+            ※ スプレッドシートにGASをデプロイしてURLを入力<br>
+            ※ gas/Code.gs を参照してください
+          </p>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">背景設定</div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label">背景画像</label>
+            <div class="radio-group" id="bgImageGroup">
+              <button class="radio-btn active" data-bg="座と興">座と興</button>
+              <button class="radio-btn" data-bg="none">なし</button>
+              <button class="radio-btn" data-bg="custom">カスタム</button>
+            </div>
+          </div>
+          <div class="form-group" id="customBgGroup" style="display: none; margin-bottom: 12px;">
+            <input type="text" class="form-input" id="customBgUrl" placeholder="画像URL（https://...）">
+          </div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label">背景サイズ: <span id="bgSizeValue">60%</span></label>
+            <input type="range" class="form-range" id="bgSizeSlider" min="20" max="100" value="60">
+          </div>
+          <div class="form-group">
+            <label class="form-label">背景透明度: <span id="bgOpacityValue">12%</span></label>
+            <input type="range" class="form-range" id="bgOpacitySlider" min="0" max="30" value="12">
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">運用方針</div>
+          <div class="policy-box">
+            <p><strong>基本方針:</strong> 緊急度の高いタスクを自分が持っている状態は、チームのボトルネックになる。</p>
+            <ul>
+              <li><strong>目指す姿:</strong> 自分のマトリクスでは「重要だが緊急でない」タスク（DESIGN領域）を多く持つ</li>
+              <li><strong>具体化したら委任:</strong> 重要度が下がり具体化してきたタスクは、権限移譲を進める</li>
+              <li><strong>緊急から落ち着きへ:</strong> 緊急対応が落ち着いたら、他者へ引き継げる形を整える</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">マトリクスについて</div>
+          <p style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.6;">
+            <strong style="color: var(--self-color);">自分Matrix:</strong><br>
+            自分が直接行動するタスク<br>
+            FIRE（重要×緊急）、DESIGN（重要×低緊急）<br>
+            QUICK（低重要×緊急）、EPOCHÉ（判断保留）
+            <br><br>
+            <strong style="color: var(--other-color);">座Matrix:</strong><br>
+            「座」とは、他者との関係性の中で生まれる創発の場<br>
+            単なる委任ではなく、協働・信頼・対話を通じて共に価値を創る空間<br>
+            WATCH（共に注視）、MONITOR（見守り）<br>
+            DELEGATE（託す）、SEED（種を蒔く）
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STATUS_CONFIG = {
+      FIRE:     { emoji: '🚨', label: 'FIRE',     layer: 'self',  pos: 'high-high' },
+      DESIGN:   { emoji: '🧭', label: 'DESIGN',   layer: 'self',  pos: 'high-low' },
+      QUICK:    { emoji: '⚡', label: 'QUICK',    layer: 'self',  pos: 'low-high' },
+      EPOCHE:   { emoji: '⚪', label: 'EPOCHÉ',   layer: 'self',  pos: 'low-low' },
+      WATCH:    { emoji: '📡', label: 'WATCH',    layer: 'other', pos: 'high-high' },
+      MONITOR:  { emoji: '🔭', label: 'MONITOR',  layer: 'other', pos: 'high-low' },
+      DELEGATE: { emoji: '📬', label: 'DELEGATE', layer: 'other', pos: 'low-high' },
+      SEED:     { emoji: '🌱', label: 'SEED',     layer: 'other', pos: 'low-low' }
+    };
+
+    const SELF_STATUSES = ['FIRE', 'DESIGN', 'QUICK', 'EPOCHE'];
+    const OTHER_STATUSES = ['WATCH', 'MONITOR', 'DELEGATE', 'SEED'];
+    const STORAGE_KEY = 'headmap_items';
+    const SHEET_URL_KEY = 'headmap_sheet_url';
+
+    let items = [];
+    let currentLayerFocus = 'self';
+    let editingItem = null;
+    let dataSource = 'none';
+
+    function getToday() { return new Date().toISOString().split('T')[0]; }
+
+    function generateId() {
+      const maxId = items.reduce((max, item) => {
+        const num = parseInt(item.id.replace('HM-', ''), 10) || 0;
+        return num > max ? num : max;
+      }, 0);
+      return `HM-${String(maxId + 1).padStart(3, '0')}`;
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ items }));
+      dataSource = 'local';
+      updateDataSourceIndicator();
+    }
+
+    function loadFromLocalStorage() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      if (data) {
+        try { return JSON.parse(data).items || []; }
+        catch (e) { return null; }
+      }
+      return null;
+    }
+
+    async function loadFromJson() {
+      try {
+        const response = await fetch('../data/items.json');
+        if (!response.ok) throw new Error('Failed');
+        return (await response.json()).items || [];
+      } catch (e) { return null; }
+    }
+
+    async function loadData() {
+      const localData = loadFromLocalStorage();
+      if (localData && localData.length > 0) {
+        items = localData;
+        dataSource = 'local';
+        render();
+        return;
+      }
+      const jsonData = await loadFromJson();
+      if (jsonData) {
+        items = jsonData;
+        dataSource = 'json';
+        saveToLocalStorage();
+        render();
+        return;
+      }
+      items = [];
+      dataSource = 'none';
+      render();
+    }
+
+    function updateDataSourceIndicator() {
+      const el = document.getElementById('dataSource');
+      if (dataSource === 'local') { el.textContent = 'LOCAL'; el.className = 'data-source local'; }
+      else if (dataSource === 'json') { el.textContent = 'JSON'; el.className = 'data-source json'; }
+      else if (dataSource === 'sheet') { el.textContent = 'SHEET'; el.className = 'data-source sheet'; }
+      else { el.textContent = '-'; el.className = 'data-source'; }
+    }
+
+    function addItem(itemData) {
+      const newItem = {
+        id: generateId(),
+        title: itemData.title,
+        shortName: itemData.shortName || '',
+        layer: itemData.layer,
+        status: itemData.status,
+        importanceScore: itemData.importanceScore,
+        urgencyScore: itemData.urgencyScore,
+        person: itemData.person || '',
+        nextAction: itemData.nextAction || '',
+        memo: itemData.memo || '',
+        createdAt: getToday(),
+        updatedAt: getToday()
+      };
+      items.push(newItem);
+      saveToLocalStorage();
+      render();
+      showToast('アイテムを追加しました', 'success');
+    }
+
+    function updateItem(id, itemData) {
+      const index = items.findIndex(item => item.id === id);
+      if (index === -1) return;
+      items[index] = { ...items[index], ...itemData, updatedAt: getToday() };
+      saveToLocalStorage();
+      render();
+      showToast('アイテムを更新しました', 'success');
+    }
+
+    function deleteItem(id) {
+      items = items.filter(item => item.id !== id);
+      saveToLocalStorage();
+      render();
+      showToast('アイテムを削除しました', 'success');
+    }
+
+    function countByStatus(status) {
+      return items.filter(i => i.status === status).length;
+    }
+
+    function groupByRelativeStatus() {
+      // Group items by their relative (calculated) status, not stored status
+      const groups = {};
+
+      // Get items for each layer and calculate bounds
+      const selfItems = items.filter(i => i.layer === 'self');
+      const otherItems = items.filter(i => i.layer === 'other');
+      const sBounds = calculateScaleBounds(selfItems);
+      const oBounds = calculateScaleBounds(otherItems);
+
+      items.forEach(item => {
+        const bounds = item.layer === 'self' ? sBounds : oBounds;
+        const relativeStatus = getRelativeStatus(item, bounds);
+        if (!groups[relativeStatus]) groups[relativeStatus] = [];
+        groups[relativeStatus].push(item);
+      });
+
+      return { groups, selfBounds: sBounds, otherBounds: oBounds };
+    }
+
+    function setLayerFocus(layer) {
+      currentLayerFocus = layer;
+      document.getElementById('matrixScene').dataset.focus = layer;
+      document.querySelectorAll('.layer-toggle-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.layer === layer);
+      });
+    }
+
+    // Calculate auto-scaling bounds for a layer
+    function calculateScaleBounds(layerItems) {
+      if (layerItems.length === 0) {
+        return { minU: 0, maxU: 100, minI: 0, maxI: 100, midU: 50, midI: 50 };
+      }
+
+      const urgencies = layerItems.map(i => i.urgencyScore ?? 50);
+      const importances = layerItems.map(i => i.importanceScore ?? 50);
+
+      let minU = Math.min(...urgencies);
+      let maxU = Math.max(...urgencies);
+      let minI = Math.min(...importances);
+      let maxI = Math.max(...importances);
+
+      // Add padding (10% of range, minimum 5 points)
+      const rangeU = maxU - minU || 20;
+      const rangeI = maxI - minI || 20;
+      const padU = Math.max(rangeU * 0.1, 5);
+      const padI = Math.max(rangeI * 0.1, 5);
+
+      minU = Math.max(0, minU - padU);
+      maxU = Math.min(100, maxU + padU);
+      minI = Math.max(0, minI - padI);
+      maxI = Math.min(100, maxI + padI);
+
+      // Calculate median for quadrant boundaries
+      const sortedU = [...urgencies].sort((a, b) => a - b);
+      const sortedI = [...importances].sort((a, b) => a - b);
+      const midU = sortedU[Math.floor(sortedU.length / 2)];
+      const midI = sortedI[Math.floor(sortedI.length / 2)];
+
+      return { minU, maxU, minI, maxI, midU, midI };
+    }
+
+    function getScorePosition(item, bounds) {
+      // Convert scores to percentage positions using auto-scaled bounds
+      const urgency = item.urgencyScore ?? 50;
+      const importance = item.importanceScore ?? 50;
+
+      const { minU, maxU, minI, maxI } = bounds;
+      const rangeU = maxU - minU || 1;
+      const rangeI = maxI - minI || 1;
+
+      // X: higher urgency = more to the right (scaled to bounds)
+      const x = ((urgency - minU) / rangeU) * 100;
+      // Y: higher importance = more to the top (invert for CSS top positioning)
+      const y = 100 - ((importance - minI) / rangeI) * 100;
+
+      // Clamp to 5-95% to keep dots within visible area
+      return {
+        x: Math.max(5, Math.min(95, x)),
+        y: Math.max(5, Math.min(95, y))
+      };
+    }
+
+    // Current bounds for each layer (set during render)
+    let selfBounds = null;
+    let otherBounds = null;
+
+    // Determine status based on position in quadrant
+    // - Urgency: fixed threshold at 50 (absolute)
+    // - Importance: median-based (relative) because importance tends to inflate
+    function getRelativeStatus(item, bounds) {
+      const urgency = item.urgencyScore ?? 50;
+      const importance = item.importanceScore ?? 50;
+      const { midI } = bounds;  // Only use median for importance
+
+      // Urgency: fixed threshold at 50
+      // Importance: relative to median (handles inflation)
+      const isHighImportance = importance >= midI;
+      const isHighUrgency = urgency >= 50;  // Fixed threshold
+
+      if (item.layer === 'self') {
+        // Self Matrix: FIRE, DESIGN, QUICK, EPOCHE
+        if (isHighImportance && isHighUrgency) return 'FIRE';
+        if (isHighImportance && !isHighUrgency) return 'DESIGN';
+        if (!isHighImportance && isHighUrgency) return 'QUICK';
+        return 'EPOCHE';
+      } else {
+        // Other Matrix (座): WATCH, MONITOR, DELEGATE, SEED
+        if (isHighImportance && isHighUrgency) return 'WATCH';
+        if (isHighImportance && !isHighUrgency) return 'MONITOR';
+        if (!isHighImportance && isHighUrgency) return 'DELEGATE';
+        return 'SEED';
+      }
+    }
+
+    // Check if item is "new" (created today)
+    function isNewItem(item) {
+      return item.createdAt === getToday();
+    }
+
+    function renderProjectDot(item, bounds) {
+      // Use relative status instead of stored status
+      const relativeStatus = getRelativeStatus(item, bounds);
+      const config = STATUS_CONFIG[relativeStatus];
+      const { x, y } = getScorePosition(item, bounds);
+      const shortName = item.shortName || item.title.slice(0, 6);
+      const urgency = item.urgencyScore ?? 50;
+      const importance = item.importanceScore ?? 50;
+      const isNew = isNewItem(item);
+
+      return `
+        <div class="project-dot" data-id="${item.id}"
+             style="left: ${x}%; top: ${y}%;">
+          <div class="dot-inner ${relativeStatus.toLowerCase()}">
+            ${isNew ? '<span class="dot-new">NEW</span>' : ''}
+            <span class="dot-emoji">${config.emoji}</span>
+            <span class="dot-name">${escapeHtml(shortName)}</span>
+            <span class="dot-score">重${importance} / 緊${urgency}</span>
+            <div class="dot-details">
+              ${item.person ? `👤 ${escapeHtml(item.person)}` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMatrix() {
+      const selfPlot = document.getElementById('selfMatrixPlot');
+      const otherPlot = document.getElementById('otherMatrixPlot');
+
+      // Get items for each layer
+      const selfItems = items.filter(i => i.layer === 'self');
+      const otherItems = items.filter(i => i.layer === 'other');
+
+      // Calculate auto-scaling bounds for each layer
+      selfBounds = calculateScaleBounds(selfItems);
+      otherBounds = calculateScaleBounds(otherItems);
+
+      // Helper to render quadrant dividers at median position
+      function renderQuadrantDividers(bounds, layerClass) {
+        const { minU, maxU, minI, maxI, midU, midI } = bounds;
+        const rangeU = maxU - minU || 1;
+        const rangeI = maxI - minI || 1;
+
+        // Calculate median positions as percentages
+        const midXPercent = ((midU - minU) / rangeU) * 100;
+        const midYPercent = 100 - ((midI - minI) / rangeI) * 100;
+
+        return `
+          <div class="quadrant-divider-h" style="top: ${midYPercent}%;"></div>
+          <div class="quadrant-divider-v" style="left: ${midXPercent}%;"></div>
+        `;
+      }
+
+      // Preserve quadrant labels
+      const selfLabels = selfPlot.querySelector('.quadrant-labels').outerHTML;
+      const otherLabels = otherPlot.querySelector('.quadrant-labels').outerHTML;
+
+      // Render self layer dots with dividers
+      if (selfItems.length > 0) {
+        const dividers = renderQuadrantDividers(selfBounds, 'self');
+        const dots = selfItems.map(i => renderProjectDot(i, selfBounds)).join('');
+        selfPlot.innerHTML = selfLabels + dividers + dots;
+      } else {
+        selfPlot.innerHTML = selfLabels + '<div class="plot-empty">アイテムなし</div>';
+      }
+
+      // Render other layer dots with dividers
+      if (otherItems.length > 0) {
+        const dividers = renderQuadrantDividers(otherBounds, 'other');
+        const dots = otherItems.map(i => renderProjectDot(i, otherBounds)).join('');
+        otherPlot.innerHTML = otherLabels + dividers + dots;
+      } else {
+        otherPlot.innerHTML = otherLabels + '<div class="plot-empty">アイテムなし</div>';
+      }
+
+      // Add click handlers for dots
+      document.querySelectorAll('.project-dot').forEach(dot => {
+        dot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = dot.dataset.id;
+          const item = items.find(i => i.id === id);
+          if (item) openEditModal(item);
+        });
+      });
+
+      // Layer click to switch focus
+      document.querySelectorAll('.matrix-layer').forEach(layer => {
+        layer.addEventListener('click', (e) => {
+          if (e.target.closest('.project-dot')) return;
+          const targetLayer = layer.classList.contains('self') ? 'self' : 'other';
+          setLayerFocus(targetLayer);
+        });
+      });
+    }
+
+    function renderCard(item, bounds) {
+      // Use relative status based on position
+      const relativeStatus = getRelativeStatus(item, bounds);
+      const config = STATUS_CONFIG[relativeStatus];
+      const importance = item.importanceScore ?? 50;
+      const urgency = item.urgencyScore ?? 50;
+      const layerClass = item.layer === 'self' ? 'self-layer' : 'other-layer';
+      const isHighPriority = importance >= 70 && urgency >= 70;
+      const isNew = isNewItem(item);
+
+      return `
+        <article class="card ${layerClass}" data-id="${item.id}">
+          <div class="card-badges">
+            ${isNew ? '<span class="badge badge-new">NEW</span>' : ''}
+            <span class="badge badge-status ${relativeStatus.toLowerCase()}">${config.emoji} ${config.label}</span>
+            <span class="badge badge-score">重${importance} / 緊${urgency}</span>
+            ${isHighPriority ? '<span class="badge badge-priority high">高優先</span>' : ''}
+          </div>
+          <h3 class="card-title">${escapeHtml(item.title)}</h3>
+          ${item.person ? `<div class="card-person">👤 ${escapeHtml(item.person)}</div>` : ''}
+          ${item.nextAction ? `<div class="card-next-action"><span class="arrow">→</span> ${escapeHtml(item.nextAction)}</div>` : ''}
+          ${item.memo ? `<div class="card-memo">${escapeHtml(item.memo)}</div>` : ''}
+          <div class="card-footer">
+            <span class="card-id">${item.id}</span>
+            <span>${item.updatedAt}</span>
+          </div>
+        </article>
+      `;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderMain() {
+      const main = document.getElementById('main');
+
+      if (items.length === 0) {
+        main.innerHTML = '<div class="empty-state">アイテムがありません<br>＋ボタンで追加しましょう</div>';
+        return;
+      }
+
+      // Get relative status groups with bounds
+      const { groups, selfBounds: sBounds, otherBounds: oBounds } = groupByRelativeStatus();
+
+      let html = '';
+
+      // Self Layer Section
+      const selfItems = items.filter(i => i.layer === 'self');
+      if (selfItems.length > 0) {
+        html += `
+          <div class="layer-divider self">
+            <span class="line"></span>
+            <span class="label">◆ 自分Matrix</span>
+            <span class="line"></span>
+          </div>
+        `;
+        SELF_STATUSES.forEach(status => {
+          const statusItems = groups[status] || [];
+          const config = STATUS_CONFIG[status];
+          html += `
+            <section class="status-section" data-status="${status}">
+              <div class="status-header">
+                <div class="status-header-left">
+                  <span class="status-emoji">${config.emoji}</span>
+                  <span class="status-name">${config.label}</span>
+                  <span class="status-count">${statusItems.length}</span>
+                </div>
+                <span class="status-toggle">▼</span>
+              </div>
+              <div class="status-items">
+                ${statusItems.length > 0 ? statusItems.map(item => renderCard(item, sBounds)).join('') : '<div class="empty-state">なし</div>'}
+              </div>
+            </section>
+          `;
+        });
+      }
+
+      // Other Layer Section
+      const otherItems = items.filter(i => i.layer === 'other');
+      if (otherItems.length > 0) {
+        html += `
+          <div class="layer-divider other">
+            <span class="line"></span>
+            <span class="label">◇ 座Matrix</span>
+            <span class="line"></span>
+          </div>
+        `;
+        OTHER_STATUSES.forEach(status => {
+          const statusItems = groups[status] || [];
+          const config = STATUS_CONFIG[status];
+          html += `
+            <section class="status-section" data-status="${status}">
+              <div class="status-header">
+                <div class="status-header-left">
+                  <span class="status-emoji">${config.emoji}</span>
+                  <span class="status-name">${config.label}</span>
+                  <span class="status-count">${statusItems.length}</span>
+                </div>
+                <span class="status-toggle">▼</span>
+              </div>
+              <div class="status-items">
+                ${statusItems.length > 0 ? statusItems.map(item => renderCard(item, oBounds)).join('') : '<div class="empty-state">なし</div>'}
+              </div>
+            </section>
+          `;
+        });
+      }
+
+      main.innerHTML = html;
+
+      document.querySelectorAll('.status-header').forEach(header => {
+        header.addEventListener('click', (e) => {
+          e.stopPropagation();
+          header.parentElement.classList.toggle('collapsed');
+        });
+      });
+
+      document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.dataset.id;
+          const item = items.find(i => i.id === id);
+          if (item) openEditModal(item);
+        });
+      });
+    }
+
+    function render() {
+      const latestDate = items.reduce((latest, item) => item.updatedAt > latest ? item.updatedAt : latest, '');
+      document.getElementById('updateDate').textContent = latestDate ? `📅 ${latestDate}` : '';
+      updateDataSourceIndicator();
+      renderMatrix();
+      renderMain();
+    }
+
+    function openModal(modal) { modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeModal(modal) { modal.classList.remove('active'); document.body.style.overflow = ''; }
+
+    function resetForm() {
+      document.getElementById('inputTitle').value = '';
+      document.getElementById('inputShortName').value = '';
+      document.getElementById('inputPerson').value = '';
+      document.getElementById('inputNextAction').value = '';
+      document.getElementById('inputMemo').value = '';
+      document.getElementById('inputImportance').value = 50;
+      document.getElementById('importanceValue').textContent = '50';
+      document.getElementById('inputUrgency').value = 50;
+      document.getElementById('urgencyValue').textContent = '50';
+      document.querySelectorAll('#layerGroup .radio-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.layer === 'self'));
+      document.querySelectorAll('#statusGroup .status-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.status === 'FIRE'));
+    }
+
+    function openAddModal() {
+      editingItem = null;
+      resetForm();
+      document.getElementById('modalTitle').textContent = '新規アイテム';
+      document.getElementById('deleteBtn').style.display = 'none';
+      openModal(document.getElementById('itemModal'));
+    }
+
+    function openEditModal(item) {
+      editingItem = item;
+      document.getElementById('modalTitle').textContent = 'アイテム編集';
+      document.getElementById('deleteBtn').style.display = 'block';
+      document.getElementById('inputTitle').value = item.title;
+      document.getElementById('inputShortName').value = item.shortName || '';
+      document.getElementById('inputPerson').value = item.person;
+      document.getElementById('inputNextAction').value = item.nextAction;
+      document.getElementById('inputMemo').value = item.memo;
+      const importance = item.importanceScore ?? 50;
+      const urgency = item.urgencyScore ?? 50;
+      document.getElementById('inputImportance').value = importance;
+      document.getElementById('importanceValue').textContent = importance;
+      document.getElementById('inputUrgency').value = urgency;
+      document.getElementById('urgencyValue').textContent = urgency;
+      document.querySelectorAll('#layerGroup .radio-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.layer === item.layer));
+      document.querySelectorAll('#statusGroup .status-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.status === item.status));
+      openModal(document.getElementById('itemModal'));
+    }
+
+    function getFormData() {
+      const activeLayer = document.querySelector('#layerGroup .radio-btn.active');
+      const activeStatus = document.querySelector('#statusGroup .status-btn.active');
+      return {
+        title: document.getElementById('inputTitle').value.trim(),
+        shortName: document.getElementById('inputShortName').value.trim(),
+        layer: activeLayer ? activeLayer.dataset.layer : 'self',
+        status: activeStatus ? activeStatus.dataset.status : 'FIRE',
+        importanceScore: parseInt(document.getElementById('inputImportance').value, 10),
+        urgencyScore: parseInt(document.getElementById('inputUrgency').value, 10),
+        person: document.getElementById('inputPerson').value.trim(),
+        nextAction: document.getElementById('inputNextAction').value.trim(),
+        memo: document.getElementById('inputMemo').value.trim()
+      };
+    }
+
+    function handleSave() {
+      const data = getFormData();
+      if (!data.title) { showToast('タイトルを入力してください', 'error'); return; }
+      if (editingItem) { updateItem(editingItem.id, data); }
+      else { addItem(data); }
+      closeModal(document.getElementById('itemModal'));
+    }
+
+    function handleDelete() {
+      if (!editingItem) return;
+      if (confirm(`「${editingItem.title}」を削除しますか？`)) {
+        deleteItem(editingItem.id);
+        closeModal(document.getElementById('itemModal'));
+      }
+    }
+
+    function exportJson() {
+      const data = JSON.stringify({ items }, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `headmap-${getToday()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('エクスポートしました', 'success');
+    }
+
+    function importJson(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.items && Array.isArray(data.items)) {
+            items = data.items;
+            saveToLocalStorage();
+            render();
+            showToast(`${items.length}件のアイテムをインポートしました`, 'success');
+            closeModal(document.getElementById('settingsModal'));
+          } else { showToast('無効なファイル形式です', 'error'); }
+        } catch (err) { showToast('ファイルの読み込みに失敗しました', 'error'); }
+      };
+      reader.readAsText(file);
+    }
+
+    async function reloadFromJson() {
+      const jsonData = await loadFromJson();
+      if (jsonData) {
+        items = jsonData;
+        saveToLocalStorage();
+        render();
+        showToast('items.jsonから再読み込みしました', 'success');
+        closeModal(document.getElementById('settingsModal'));
+      } else { showToast('items.jsonの読み込みに失敗しました', 'error'); }
+    }
+
+    function clearLocalData() {
+      if (confirm('ローカルデータをクリアしますか？')) {
+        localStorage.removeItem(STORAGE_KEY);
+        items = [];
+        dataSource = 'none';
+        render();
+        showToast('ローカルデータをクリアしました', 'success');
+        closeModal(document.getElementById('settingsModal'));
+      }
+    }
+
+    function extractSheetId(url) {
+      // Google Spreadsheet URL patterns:
+      // https://docs.google.com/spreadsheets/d/SHEET_ID/edit...
+      // https://docs.google.com/spreadsheets/d/SHEET_ID/...
+      const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      return match ? match[1] : null;
+    }
+
+    function parseCSVLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    function parseSheetCSV(csv) {
+      const lines = csv.split('\n').filter(line => line.trim());
+      if (lines.length < 2) return [];
+
+      const headers = parseCSVLine(lines[0]);
+      const newItems = [];
+
+      // Header mapping (flexible with partial matching)
+      const headerMap = {};
+      headers.forEach((h, i) => {
+        const header = h.trim();
+        const lower = header.toLowerCase();
+        if (lower === 'id') headerMap.id = i;
+        else if (lower === 'title' || header.includes('タイトル') || header.includes('プロジェクト名') || header.includes('名前')) headerMap.title = i;
+        else if (lower === 'shortname' || lower === 'short' || header.includes('ショート') || header.includes('略称')) headerMap.shortName = i;
+        else if (lower === 'layer' || header.includes('レイヤー') || header.includes('自分フラグ') || header.includes('自分') || header.includes('マトリ')) headerMap.layer = i;
+        else if (lower === 'status' || header.includes('ステータス')) headerMap.status = i;
+        else if (header.includes('重要') || lower === 'importance' || lower === 'importancescore') headerMap.importance = i;
+        else if (header.includes('緊急') || lower === 'urgency' || lower === 'urgencyscore') headerMap.urgency = i;
+        else if (lower === 'person' || header.includes('関係者') || header.includes('担当')) headerMap.person = i;
+        else if (lower === 'nextaction' || lower === 'next' || header.includes('次') || header.includes('アクション')) headerMap.nextAction = i;
+        else if (lower === 'memo' || header.includes('メモ') || header.includes('備考')) headerMap.memo = i;
+      });
+
+      console.log('Detected headers:', headers);
+      console.log('Header mapping:', headerMap);
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = parseCSVLine(lines[i]);
+        if (values.length < 2) continue;
+
+        const id = headerMap.id !== undefined ? values[headerMap.id] : `HM-${String(i).padStart(3, '0')}`;
+        const title = headerMap.title !== undefined ? values[headerMap.title] : '';
+        if (!title) continue;
+
+        // Layer parsing: handle various formats (self/other, TRUE/FALSE, チェック, 1/0, etc.)
+        // 「自分フラグ」カラム: TRUE/チェックあり → self(自分Matrix), FALSE/空 → other(座Matrix)
+        const layerRaw = headerMap.layer !== undefined ? values[headerMap.layer]?.trim() : '';
+        let layer = 'other'; // default: 座Matrix
+        const layerLower = layerRaw.toLowerCase();
+        // Check for "self" indicators (TRUE, 1, self, yes, チェック, etc.)
+        if (layerLower === 'self' || layerLower === 'true' || layerLower === '1' || layerLower === 'yes' || layerRaw === '✓' || layerRaw === '○') {
+          layer = 'self';
+        }
+        // Explicit "other" indicators
+        else if (layerLower === 'other') {
+          layer = 'other';
+        }
+        // Empty or FALSE → other (座Matrix)
+
+        const status = headerMap.status !== undefined ? values[headerMap.status]?.toUpperCase()?.trim() : 'FIRE';
+        const importanceRaw = headerMap.importance !== undefined ? values[headerMap.importance]?.trim() : '';
+        const urgencyRaw = headerMap.urgency !== undefined ? values[headerMap.urgency]?.trim() : '';
+        const importance = parseInt(importanceRaw, 10) || 50;
+        const urgency = parseInt(urgencyRaw, 10) || 50;
+
+        // Debug: output all rows' layer and status data
+        const statusRaw = headerMap.status !== undefined ? values[headerMap.status] : '(no status column)';
+        console.log(`Row ${i}: title="${title}", layerRaw="${layerRaw}"→${layer}, statusRaw="${statusRaw}"→${status}→${Object.keys(STATUS_CONFIG).includes(status) ? status : 'FALLBACK'}`);
+
+        // Validate status
+        const validStatus = Object.keys(STATUS_CONFIG).includes(status) ? status :
+                           (layer === 'self' ? 'FIRE' : 'WATCH');
+
+        newItems.push({
+          id: id || `HM-${String(i).padStart(3, '0')}`,
+          title: title,
+          shortName: headerMap.shortName !== undefined ? values[headerMap.shortName]?.trim() || '' : '',
+          layer: layer,
+          status: validStatus,
+          importanceScore: Math.max(0, Math.min(100, importance)),
+          urgencyScore: Math.max(0, Math.min(100, urgency)),
+          person: headerMap.person !== undefined ? values[headerMap.person]?.trim() || '' : '',
+          nextAction: headerMap.nextAction !== undefined ? values[headerMap.nextAction]?.trim() || '' : '',
+          memo: headerMap.memo !== undefined ? values[headerMap.memo]?.trim() || '' : '',
+          createdAt: getToday(),
+          updatedAt: getToday()
+        });
+      }
+
+      return newItems;
+    }
+
+    async function fetchFromSpreadsheet() {
+      const urlInput = document.getElementById('sheetUrl');
+      const url = urlInput.value.trim();
+
+      if (!url) {
+        showToast('スプレッドシートのURLを入力してください', 'error');
+        return;
+      }
+
+      const sheetId = extractSheetId(url);
+      if (!sheetId) {
+        showToast('無効なスプレッドシートURLです', 'error');
+        return;
+      }
+
+      // Save URL for next time
+      localStorage.setItem(SHEET_URL_KEY, url);
+
+      // Google Sheets CSV export URL
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+
+      showToast('スプレッドシートを取得中...', '');
+
+      try {
+        const response = await fetch(csvUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const csv = await response.text();
+        const newItems = parseSheetCSV(csv);
+
+        if (newItems.length === 0) {
+          showToast('データが見つかりませんでした', 'error');
+          return;
+        }
+
+        items = newItems;
+        dataSource = 'sheet';
+        saveToLocalStorage();
+        render();
+        showToast(`${newItems.length}件のアイテムを取得しました`, 'success');
+        closeModal(document.getElementById('settingsModal'));
+      } catch (err) {
+        console.error('Spreadsheet fetch error:', err);
+        showToast('取得に失敗しました。URLと公開設定を確認してください', 'error');
+      }
+    }
+
+    function showToast(message, type = '') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // GAS URL storage key
+    const GAS_URL_KEY = 'headmap_gas_url';
+    const BG_SETTINGS_KEY = 'headmap_bg_settings';
+
+    // Background settings
+    function loadBgSettings() {
+      const saved = localStorage.getItem(BG_SETTINGS_KEY);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {}
+      }
+      return { image: '座と興', size: 60, opacity: 12, customUrl: '' };
+    }
+
+    function saveBgSettings(settings) {
+      localStorage.setItem(BG_SETTINGS_KEY, JSON.stringify(settings));
+    }
+
+    function applyBgSettings(settings) {
+      const root = document.documentElement;
+
+      // Set background image
+      if (settings.image === 'none') {
+        root.style.setProperty('--bg-image', 'none');
+      } else if (settings.image === 'custom' && settings.customUrl) {
+        root.style.setProperty('--bg-image', `url('${settings.customUrl}')`);
+      } else {
+        root.style.setProperty('--bg-image', "url('座と興.jpeg')");
+      }
+
+      // Set size and opacity
+      root.style.setProperty('--bg-size', settings.size + '%');
+      root.style.setProperty('--bg-opacity', (settings.opacity / 100).toFixed(2));
+    }
+
+    function initBgSettings() {
+      const settings = loadBgSettings();
+      applyBgSettings(settings);
+
+      // Update UI
+      document.querySelectorAll('#bgImageGroup .radio-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.bg === settings.image);
+      });
+      document.getElementById('bgSizeSlider').value = settings.size;
+      document.getElementById('bgSizeValue').textContent = settings.size + '%';
+      document.getElementById('bgOpacitySlider').value = settings.opacity;
+      document.getElementById('bgOpacityValue').textContent = settings.opacity + '%';
+
+      if (settings.image === 'custom') {
+        document.getElementById('customBgGroup').style.display = 'block';
+        document.getElementById('customBgUrl').value = settings.customUrl || '';
+      }
+    }
+
+    // Test GAS connection
+    async function testGasConnection() {
+      const gasUrl = document.getElementById('gasUrl').value.trim();
+      if (!gasUrl) {
+        showToast('GAS URLを入力してください', 'error');
+        return;
+      }
+
+      localStorage.setItem(GAS_URL_KEY, gasUrl);
+      showToast('GAS接続テスト中...', '');
+
+      try {
+        const response = await fetch(gasUrl);
+        const result = await response.json();
+
+        if (result.success) {
+          showToast('GAS接続成功!', 'success');
+        } else {
+          showToast('GAS接続失敗: ' + (result.error || 'Unknown error'), 'error');
+        }
+      } catch (err) {
+        console.error('GAS test error:', err);
+        showToast('GAS接続エラー: ' + err.message, 'error');
+      }
+    }
+
+    // Push all items to spreadsheet via GAS
+    async function pushToSpreadsheet() {
+      const gasUrl = document.getElementById('gasUrl').value.trim();
+      if (!gasUrl) {
+        showToast('GAS URLを入力してください', 'error');
+        return;
+      }
+
+      if (items.length === 0) {
+        showToast('書き戻すデータがありません', 'error');
+        return;
+      }
+
+      localStorage.setItem(GAS_URL_KEY, gasUrl);
+      showToast('スプレッドシートへ書き戻し中...', '');
+
+      try {
+        const response = await fetch(gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'sync',
+            items: items
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showToast(`書き戻し完了! 更新:${result.result.updated} 追加:${result.result.added}`, 'success');
+          closeModal(document.getElementById('settingsModal'));
+        } else {
+          showToast('書き戻し失敗: ' + (result.error || 'Unknown error'), 'error');
+        }
+      } catch (err) {
+        console.error('Push to sheet error:', err);
+        showToast('書き戻しエラー: ' + err.message, 'error');
+      }
+    }
+
+    // Push single item update to GAS
+    async function pushItemToGas(item, action = 'update') {
+      const gasUrl = localStorage.getItem(GAS_URL_KEY);
+      if (!gasUrl) return; // Silently skip if no GAS configured
+
+      try {
+        await fetch(gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, item })
+        });
+      } catch (err) {
+        console.warn('GAS sync failed:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Layer toggle
+      document.querySelectorAll('.layer-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => setLayerFocus(btn.dataset.layer));
+      });
+
+      // FAB
+      document.getElementById('addBtn').addEventListener('click', openAddModal);
+
+      // Item Modal
+      const itemModal = document.getElementById('itemModal');
+      document.getElementById('modalClose').addEventListener('click', () => closeModal(itemModal));
+      document.getElementById('cancelBtn').addEventListener('click', () => closeModal(itemModal));
+      document.getElementById('saveBtn').addEventListener('click', handleSave);
+      document.getElementById('deleteBtn').addEventListener('click', handleDelete);
+      itemModal.addEventListener('click', (e) => { if (e.target === itemModal) closeModal(itemModal); });
+
+      // Layer radio buttons
+      document.querySelectorAll('#layerGroup .radio-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#layerGroup .radio-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+
+      // Status buttons
+      document.querySelectorAll('#statusGroup .status-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#statusGroup .status-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+
+      // Quick Sync Button (in header)
+      document.getElementById('syncSheetBtn').addEventListener('click', fetchFromSpreadsheet);
+
+      // Settings Modal
+      const settingsModal = document.getElementById('settingsModal');
+      document.getElementById('settingsBtn').addEventListener('click', () => openModal(settingsModal));
+      document.getElementById('settingsClose').addEventListener('click', () => closeModal(settingsModal));
+      settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeModal(settingsModal); });
+
+      // Settings actions
+      document.getElementById('exportBtn').addEventListener('click', exportJson);
+      document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+      document.getElementById('importFile').addEventListener('change', (e) => {
+        if (e.target.files[0]) { importJson(e.target.files[0]); e.target.value = ''; }
+      });
+      document.getElementById('reloadJsonBtn').addEventListener('click', reloadFromJson);
+      document.getElementById('clearLocalBtn').addEventListener('click', clearLocalData);
+
+      // Spreadsheet
+      const savedSheetUrl = localStorage.getItem(SHEET_URL_KEY);
+      if (savedSheetUrl) {
+        document.getElementById('sheetUrl').value = savedSheetUrl;
+      }
+      document.getElementById('fetchSheetBtn').addEventListener('click', fetchFromSpreadsheet);
+
+      // GAS (Spreadsheet write-back)
+      const savedGasUrl = localStorage.getItem(GAS_URL_KEY);
+      if (savedGasUrl) {
+        document.getElementById('gasUrl').value = savedGasUrl;
+      }
+      document.getElementById('testGasBtn').addEventListener('click', testGasConnection);
+      document.getElementById('pushToSheetBtn').addEventListener('click', pushToSpreadsheet);
+
+      // Background settings
+      initBgSettings();
+
+      document.querySelectorAll('#bgImageGroup .radio-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#bgImageGroup .radio-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const settings = loadBgSettings();
+          settings.image = btn.dataset.bg;
+
+          // Show/hide custom URL input
+          document.getElementById('customBgGroup').style.display =
+            btn.dataset.bg === 'custom' ? 'block' : 'none';
+
+          saveBgSettings(settings);
+          applyBgSettings(settings);
+        });
+      });
+
+      document.getElementById('customBgUrl').addEventListener('change', (e) => {
+        const settings = loadBgSettings();
+        settings.customUrl = e.target.value.trim();
+        saveBgSettings(settings);
+        applyBgSettings(settings);
+      });
+
+      document.getElementById('bgSizeSlider').addEventListener('input', (e) => {
+        const value = parseInt(e.target.value, 10);
+        document.getElementById('bgSizeValue').textContent = value + '%';
+        const settings = loadBgSettings();
+        settings.size = value;
+        saveBgSettings(settings);
+        applyBgSettings(settings);
+      });
+
+      document.getElementById('bgOpacitySlider').addEventListener('input', (e) => {
+        const value = parseInt(e.target.value, 10);
+        document.getElementById('bgOpacityValue').textContent = value + '%';
+        const settings = loadBgSettings();
+        settings.opacity = value;
+        saveBgSettings(settings);
+        applyBgSettings(settings);
+      });
+
+      // Score slider updates
+      document.getElementById('inputImportance').addEventListener('input', (e) => {
+        document.getElementById('importanceValue').textContent = e.target.value;
+      });
+      document.getElementById('inputUrgency').addEventListener('input', (e) => {
+        document.getElementById('urgencyValue').textContent = e.target.value;
+      });
+
+      loadData();
+    });
+  </script>
+</body>
+</html>

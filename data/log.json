@@ -1,0 +1,20 @@
+{
+  "log": [
+    {
+      "timestamp": "2026-04-13T12:15:52.163Z",
+      "itemId": "HM-009",
+      "field": "created",
+      "from": null,
+      "to": "QUICK",
+      "note": "新規作成: テストアイテム"
+    },
+    {
+      "timestamp": "2026-04-13T12:15:58.460Z",
+      "itemId": "HM-009",
+      "field": "status",
+      "from": "QUICK",
+      "to": "FIRE",
+      "note": "緊急度アップ"
+    }
+  ]
+}
