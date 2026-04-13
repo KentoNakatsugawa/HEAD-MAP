@@ -1409,13 +1409,18 @@
 
     async function loadFromJson() {
       try {
+        // Try to load from local JSON file (works in local dev, may fail on deployed site)
         const response = await fetch('../data/items.json');
         if (!response.ok) throw new Error('Failed');
         return (await response.json()).items || [];
-      } catch (e) { return null; }
+      } catch (e) {
+        console.log('Note: items.json not available (normal for deployed site)');
+        return null;
+      }
     }
 
     async function loadData() {
+      // First, try localStorage
       const localData = loadFromLocalStorage();
       if (localData && localData.length > 0) {
         items = localData;
@@ -1423,14 +1428,18 @@
         render();
         return;
       }
+
+      // Then, try loading from JSON file
       const jsonData = await loadFromJson();
-      if (jsonData) {
+      if (jsonData && jsonData.length > 0) {
         items = jsonData;
         dataSource = 'json';
         saveToLocalStorage();
         render();
         return;
       }
+
+      // No data found - start fresh
       items = [];
       dataSource = 'none';
       render();
