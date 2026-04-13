@@ -2273,7 +2273,7 @@
 
     // GAS URL storage key and default
     const GAS_URL_KEY = 'headmap_gas_url';
-    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbyw9feyGSbtdSXno4N2OrWObeihf7nlTRhuuXzPF0MW4KJN4YGWUoCS6Pgp0BN9sm1RvQ/exec';
+    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbywZosA4l1tNV-797ghvSFw8dthGmLTBLcbTXZW4EY-akpDCbKE2C8Ueiv0H0AaIV0MJA/exec';
     const BG_SETTINGS_KEY = 'headmap_bg_settings';
 
     // Background settings
@@ -2372,7 +2372,8 @@
       try {
         const response = await fetch(gasUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify({
             action: 'sync',
             items: items
@@ -2401,7 +2402,8 @@
       try {
         await fetch(gasUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify({ action, item })
         });
       } catch (err) {

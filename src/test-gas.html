@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GAS API テスト</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #1a1a2e; color: #fff; }
+    .test-section { margin: 20px 0; padding: 15px; background: #16213e; border-radius: 8px; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 5px; }
+    .btn-get { background: #4CAF50; color: white; }
+    .btn-post { background: #2196F3; color: white; }
+    .btn-reset { background: #f44336; color: white; }
+    pre { background: #0f0f23; padding: 15px; border-radius: 5px; overflow-x: auto; white-space: pre-wrap; }
+    .success { color: #4CAF50; }
+    .error { color: #f44336; }
+    .info { color: #2196F3; }
+  </style>
+</head>
+<body>
+  <h1>HEAD MAP - GAS API テスト</h1>
+
+  <div class="test-section">
+    <h2>GAS URL</h2>
+    <input type="text" id="gasUrl" style="width: 100%; padding: 10px; font-size: 14px;"
+           value="https://script.google.com/macros/s/AKfycbywZosA4l1tNV-797ghvSFw8dthGmLTBLcbTXZW4EY-akpDCbKE2C8Ueiv0H0AaIV0MJA/exec">
+  </div>
+
+  <div class="test-section">
+    <h2>1. GET テスト（接続確認）</h2>
+    <button class="btn-get" onclick="testGet()">GET テスト実行</button>
+    <pre id="getResult">結果がここに表示されます</pre>
+  </div>
+
+  <div class="test-section">
+    <h2>2. POST テスト（アイテム更新）</h2>
+    <p>HM-001のmemoを「テスト更新」に変更します</p>
+    <button class="btn-post" onclick="testPostUpdate()">POST 更新テスト実行</button>
+    <pre id="postUpdateResult">結果がここに表示されます</pre>
+  </div>
+
+  <div class="test-section">
+    <h2>3. POST テスト（全件同期）</h2>
+    <p>テストデータ1件を同期します</p>
+    <button class="btn-post" onclick="testPostSync()">POST 同期テスト実行</button>
+    <pre id="postSyncResult">結果がここに表示されます</pre>
+  </div>
+
+  <div class="test-section">
+    <h2>4. 元に戻す（memoを空に）</h2>
+    <button class="btn-reset" onclick="resetMemo()">memoを空に戻す</button>
+    <pre id="resetResult">結果がここに表示されます</pre>
+  </div>
+
+  <div class="test-section">
+    <h2>テスト結果サマリー</h2>
+    <pre id="summary"></pre>
+  </div>
+
+  <script>
+    const results = {
+      get: null,
+      postUpdate: null,
+      postSync: null,
+      reset: null
+    };
+
+    function getGasUrl() {
+      return document.getElementById('gasUrl').value.trim();
+    }
+
+    function updateSummary() {
+      const summary = document.getElementById('summary');
+      let text = '=== テスト結果サマリー ===\n\n';
+      text += `GET テスト: ${results.get === null ? '未実行' : results.get ? '✅ 成功' : '❌ 失敗'}\n`;
+      text += `POST 更新テスト: ${results.postUpdate === null ? '未実行' : results.postUpdate ? '✅ 成功' : '❌ 失敗'}\n`;
+      text += `POST 同期テスト: ${results.postSync === null ? '未実行' : results.postSync ? '✅ 成功' : '❌ 失敗'}\n`;
+      text += `リセット: ${results.reset === null ? '未実行' : results.reset ? '✅ 成功' : '❌ 失敗'}\n`;
+      text += `\n実行日時: ${new Date().toLocaleString('ja-JP')}`;
+      summary.textContent = text;
+    }
+
+    async function testGet() {
+      const resultEl = document.getElementById('getResult');
+      resultEl.textContent = '実行中...';
+      resultEl.className = 'info';
+
+      try {
+        const start = Date.now();
+        const response = await fetch(getGasUrl());
+        const data = await response.json();
+        const elapsed = Date.now() - start;
+
+        results.get = data.success;
+        resultEl.className = data.success ? 'success' : 'error';
+        resultEl.textContent = `ステータス: ${response.status}\n応答時間: ${elapsed}ms\n\n${JSON.stringify(data, null, 2)}`;
+      } catch (err) {
+        results.get = false;
+        resultEl.className = 'error';
+        resultEl.textContent = `エラー: ${err.message}`;
+      }
+      updateSummary();
+    }
+
+    async function testPostUpdate() {
+      const resultEl = document.getElementById('postUpdateResult');
+      resultEl.textContent = '実行中...';
+      resultEl.className = 'info';
+
+      try {
+        const start = Date.now();
+        const response = await fetch(getGasUrl(), {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'update',
+            item: {
+              id: 'HM-001',
+              memo: 'テスト更新 - ' + new Date().toLocaleString('ja-JP')
+            }
+          })
+        });
+        const elapsed = Date.now() - start;
+        const text = await response.text();
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { raw: text };
+        }
+
+        results.postUpdate = data.success === true;
+        resultEl.className = results.postUpdate ? 'success' : 'error';
+        resultEl.textContent = `ステータス: ${response.status}\n応答時間: ${elapsed}ms\n\n${JSON.stringify(data, null, 2)}`;
+      } catch (err) {
+        results.postUpdate = false;
+        resultEl.className = 'error';
+        resultEl.textContent = `エラー: ${err.message}`;
+      }
+      updateSummary();
+    }
+
+    async function testPostSync() {
+      const resultEl = document.getElementById('postSyncResult');
+      resultEl.textContent = '実行中...';
+      resultEl.className = 'info';
+
+      try {
+        const start = Date.now();
+        const response = await fetch(getGasUrl(), {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'sync',
+            items: [{
+              id: 'HM-001',
+              title: 'Selfregi - 新規開発',
+              shortName: 'Selfregi新',
+              layer: 'self',
+              status: 'DESIGN',
+              importanceScore: 95,
+              urgencyScore: 60,
+              person: '',
+              nextAction: '',
+              memo: ''
+            }]
+          })
+        });
+        const elapsed = Date.now() - start;
+        const text = await response.text();
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { raw: text };
+        }
+
+        results.postSync = data.success === true;
+        resultEl.className = results.postSync ? 'success' : 'error';
+        resultEl.textContent = `ステータス: ${response.status}\n応答時間: ${elapsed}ms\n\n${JSON.stringify(data, null, 2)}`;
+      } catch (err) {
+        results.postSync = false;
+        resultEl.className = 'error';
+        resultEl.textContent = `エラー: ${err.message}`;
+      }
+      updateSummary();
+    }
+
+    async function resetMemo() {
+      const resultEl = document.getElementById('resetResult');
+      resultEl.textContent = '実行中...';
+      resultEl.className = 'info';
+
+      try {
+        const start = Date.now();
+        const response = await fetch(getGasUrl(), {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'update',
+            item: {
+              id: 'HM-001',
+              memo: ''
+            }
+          })
+        });
+        const elapsed = Date.now() - start;
+        const text = await response.text();
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { raw: text };
+        }
+
+        results.reset = data.success === true;
+        resultEl.className = results.reset ? 'success' : 'error';
+        resultEl.textContent = `ステータス: ${response.status}\n応答時間: ${elapsed}ms\n\n${JSON.stringify(data, null, 2)}`;
+      } catch (err) {
+        results.reset = false;
+        resultEl.className = 'error';
+        resultEl.textContent = `エラー: ${err.message}`;
+      }
+      updateSummary();
+    }
+
+    // 初期化
+    updateSummary();
+  </script>
+</body>
+</html>

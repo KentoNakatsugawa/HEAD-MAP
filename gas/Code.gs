@@ -12,14 +12,8 @@
  * 7. HEAD MAPの設定でそのURLを入力
  */
 
-// CORS対応: OPTIONSリクエストに応答
-function doOptions(e) {
-  return ContentService.createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeader('Access-Control-Allow-Origin', '*')
-    .setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
-}
+// 注: GAS WebアプリはCORSを自動的に処理するため、doOptionsは不要
+// ブラウザからのfetchは自動的にリダイレクトされて処理される
 
 // GETリクエスト: 接続テスト用
 function doGet(e) {
@@ -97,8 +91,11 @@ function getHeaderMap() {
 // IDで行を検索
 function findRowById(sheet, idColumn, targetId) {
   const data = sheet.getDataRange().getValues();
+  const targetIdStr = String(targetId).trim();
   for (let i = 1; i < data.length; i++) {
-    if (data[i][idColumn] === targetId) {
+    // 型の違いを吸収するため、両方とも文字列として比較
+    const cellValue = String(data[i][idColumn]).trim();
+    if (cellValue === targetIdStr) {
       return i + 1; // 1-indexed
     }
   }
