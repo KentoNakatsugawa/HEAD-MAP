@@ -269,6 +269,7 @@
       padding: 16px;
       max-width: 600px;
       margin: 0 auto;
+      margin-bottom: 40px;
       perspective: 1200px;
     }
 
@@ -1491,6 +1492,7 @@
     const OTHER_STATUSES = ['WATCH', 'MONITOR', 'DELEGATE', 'SEED'];
     const STORAGE_KEY = 'headmap_items';
     const SHEET_URL_KEY = 'headmap_sheet_url';
+    const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1omNh7Jfmb2uf5ant19-8oJhTDXfBiOEdEVgLFxvZ3xk/edit?gid=0#gid=0';
 
     let items = [];
     let currentLayerFocus = 'self';
@@ -2269,8 +2271,9 @@
       setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
-    // GAS URL storage key
+    // GAS URL storage key and default
     const GAS_URL_KEY = 'headmap_gas_url';
+    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbyw9feyGSbtdSXno4N2OrWObeihf7nlTRhuuXzPF0MW4KJN4YGWUoCS6Pgp0BN9sm1RvQ/exec';
     const BG_SETTINGS_KEY = 'headmap_bg_settings';
 
     // Background settings
@@ -2458,17 +2461,13 @@
       document.getElementById('clearLocalBtn').addEventListener('click', clearLocalData);
 
       // Spreadsheet
-      const savedSheetUrl = localStorage.getItem(SHEET_URL_KEY);
-      if (savedSheetUrl) {
-        document.getElementById('sheetUrl').value = savedSheetUrl;
-      }
+      const savedSheetUrl = localStorage.getItem(SHEET_URL_KEY) || DEFAULT_SHEET_URL;
+      document.getElementById('sheetUrl').value = savedSheetUrl;
       document.getElementById('fetchSheetBtn').addEventListener('click', fetchFromSpreadsheet);
 
       // GAS (Spreadsheet write-back)
-      const savedGasUrl = localStorage.getItem(GAS_URL_KEY);
-      if (savedGasUrl) {
-        document.getElementById('gasUrl').value = savedGasUrl;
-      }
+      const savedGasUrl = localStorage.getItem(GAS_URL_KEY) || DEFAULT_GAS_URL;
+      document.getElementById('gasUrl').value = savedGasUrl;
       document.getElementById('testGasBtn').addEventListener('click', testGasConnection);
       document.getElementById('pushToSheetBtn').addEventListener('click', pushToSpreadsheet);
 
