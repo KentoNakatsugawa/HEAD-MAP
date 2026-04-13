@@ -254,6 +254,16 @@
       line-height: 1.4;
     }
 
+    .overview-note {
+      font-size: 0.75rem;
+      color: var(--other-color);
+      text-align: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-style: italic;
+    }
+
     /* Matrix Container */
     .matrix-container {
       padding: 16px;
@@ -286,7 +296,7 @@
     /* Self Layer (Front) */
     .matrix-layer.self {
       z-index: 2;
-      background: linear-gradient(135deg, rgba(91, 143, 255, 0.12) 0%, rgba(91, 143, 255, 0.03) 100%);
+      background: linear-gradient(135deg, rgba(15, 25, 50, 0.92) 0%, rgba(10, 20, 40, 0.88) 100%);
       border: 2px solid rgba(91, 143, 255, 0.5);
       box-shadow: 0 12px 40px rgba(91, 143, 255, 0.2);
     }
@@ -304,7 +314,7 @@
     /* Other Layer (Back - 座 Matrix 間/関係性) */
     .matrix-layer.other {
       z-index: 1;
-      background: linear-gradient(135deg, rgba(15, 20, 35, 0.7) 0%, rgba(10, 15, 25, 0.5) 100%);
+      background: linear-gradient(135deg, rgba(25, 22, 15, 0.92) 0%, rgba(20, 18, 12, 0.88) 100%);
       border: 1px solid rgba(212, 168, 85, 0.5);
       box-shadow: 0 12px 40px rgba(212, 168, 85, 0.2);
     }
@@ -1143,29 +1153,6 @@
     </button>
   </nav>
 
-  <!-- Matrix Overview -->
-  <section class="matrix-overview">
-    <div class="overview-content">
-      <p class="overview-lead">重要度と緊急度で整理する、二層のタスクマトリクス</p>
-      <div class="overview-layers">
-        <div class="overview-layer self">
-          <span class="overview-dot"></span>
-          <div>
-            <strong>自分Matrix</strong>
-            <span class="overview-desc">自分が直接行動するタスク</span>
-          </div>
-        </div>
-        <div class="overview-layer other">
-          <span class="overview-dot"></span>
-          <div>
-            <strong>座Matrix</strong>
-            <span class="overview-desc">他者との協働・委任で進めるタスク</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- Matrix Visualization -->
   <section class="matrix-container">
     <div class="matrix-scene" id="matrixScene" data-focus="self">
@@ -1228,6 +1215,30 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Matrix Overview (説明) -->
+  <section class="matrix-overview">
+    <div class="overview-content">
+      <p class="overview-lead">重要度と緊急度で整理する、二層のタスクマトリクス</p>
+      <div class="overview-layers">
+        <div class="overview-layer self">
+          <span class="overview-dot"></span>
+          <div>
+            <strong>自分Matrix</strong>
+            <span class="overview-desc">自分が直接行動するタスク</span>
+          </div>
+        </div>
+        <div class="overview-layer other">
+          <span class="overview-dot"></span>
+          <div>
+            <strong>座Matrix</strong>
+            <span class="overview-desc">他者との協働・委任で進めるタスク</span>
+          </div>
+        </div>
+      </div>
+      <p class="overview-note">緊急度が高いタスクが自分Matrixに集中している場合、座Matrixへの移譲を検討すべきサイン</p>
     </div>
   </section>
 
@@ -1713,9 +1724,9 @@
       }
     }
 
-    // Check if item is "new" (created today)
+    // Check if item has "new" flag (manually set, e.g., for updates to discuss)
     function isNewItem(item) {
-      return item.createdAt === getToday();
+      return item.isNew === true;
     }
 
     function renderProjectDot(item, bounds) {
@@ -2134,6 +2145,7 @@
         else if (lower === 'person' || header.includes('関係者') || header.includes('担当')) headerMap.person = i;
         else if (lower === 'nextaction' || lower === 'next' || header.includes('次') || header.includes('アクション')) headerMap.nextAction = i;
         else if (lower === 'memo' || header.includes('メモ') || header.includes('備考')) headerMap.memo = i;
+        else if (lower === 'new' || lower === 'isnew' || header.includes('NEW') || header.includes('更新')) headerMap.isNew = i;
       });
 
       console.log('Detected headers:', headers);
@@ -2176,6 +2188,11 @@
         const validStatus = Object.keys(STATUS_CONFIG).includes(status) ? status :
                            (layer === 'self' ? 'FIRE' : 'WATCH');
 
+        // Parse isNew flag (TRUE, 1, yes, ✓, ○ → true)
+        const isNewRaw = headerMap.isNew !== undefined ? values[headerMap.isNew]?.trim() : '';
+        const isNewLower = isNewRaw.toLowerCase();
+        const isNew = isNewLower === 'true' || isNewLower === '1' || isNewLower === 'yes' || isNewRaw === '✓' || isNewRaw === '○';
+
         newItems.push({
           id: id || `HM-${String(i).padStart(3, '0')}`,
           title: title,
@@ -2187,6 +2204,7 @@
           person: headerMap.person !== undefined ? values[headerMap.person]?.trim() || '' : '',
           nextAction: headerMap.nextAction !== undefined ? values[headerMap.nextAction]?.trim() || '' : '',
           memo: headerMap.memo !== undefined ? values[headerMap.memo]?.trim() || '' : '',
+          isNew: isNew,
           createdAt: getToday(),
           updatedAt: getToday()
         });
