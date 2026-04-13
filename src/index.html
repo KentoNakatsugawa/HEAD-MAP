@@ -173,6 +173,87 @@
       border-color: var(--other-color);
     }
 
+    /* Matrix Overview */
+    .matrix-overview {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .overview-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .overview-lead {
+      font-size: 0.875rem;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .overview-layers {
+      display: flex;
+      gap: 12px;
+    }
+
+    .overview-layer {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--bg);
+    }
+
+    .overview-layer.self {
+      border-left: 3px solid var(--self-color);
+    }
+
+    .overview-layer.other {
+      border-left: 3px solid var(--other-color);
+    }
+
+    .overview-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+
+    .overview-layer.self .overview-dot {
+      background: var(--self-color);
+    }
+
+    .overview-layer.other .overview-dot {
+      background: var(--other-color);
+    }
+
+    .overview-layer strong {
+      display: block;
+      font-size: 0.75rem;
+      margin-bottom: 2px;
+    }
+
+    .overview-layer.self strong {
+      color: var(--self-color);
+    }
+
+    .overview-layer.other strong {
+      color: var(--other-color);
+    }
+
+    .overview-desc {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
     /* Matrix Container */
     .matrix-container {
       padding: 16px;
@@ -1061,6 +1142,29 @@
       <span>座Matrix</span>
     </button>
   </nav>
+
+  <!-- Matrix Overview -->
+  <section class="matrix-overview">
+    <div class="overview-content">
+      <p class="overview-lead">重要度と緊急度で整理する、二層のタスクマトリクス</p>
+      <div class="overview-layers">
+        <div class="overview-layer self">
+          <span class="overview-dot"></span>
+          <div>
+            <strong>自分Matrix</strong>
+            <span class="overview-desc">自分が直接行動するタスク</span>
+          </div>
+        </div>
+        <div class="overview-layer other">
+          <span class="overview-dot"></span>
+          <div>
+            <strong>座Matrix</strong>
+            <span class="overview-desc">他者との協働・委任で進めるタスク</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Matrix Visualization -->
   <section class="matrix-container">
