@@ -1678,7 +1678,24 @@
     }
 
     async function loadData() {
-      // First, try localStorage
+      // First, try to fetch from spreadsheet (primary data source)
+      const sheetUrl = localStorage.getItem(SHEET_URL_KEY) || DEFAULT_SHEET_URL;
+      if (sheetUrl) {
+        try {
+          const sheetData = await fetchFromSpreadsheetSilent();
+          if (sheetData && sheetData.length > 0) {
+            items = sheetData;
+            dataSource = 'sheet';
+            saveToLocalStorage();
+            render();
+            return;
+          }
+        } catch (err) {
+          console.log('Spreadsheet fetch failed, falling back to local data:', err.message);
+        }
+      }
+
+      // Fallback: try localStorage
       const localData = loadFromLocalStorage();
       if (localData && localData.length > 0) {
         items = localData;
@@ -2354,6 +2371,22 @@
       }
 
       return newItems;
+    }
+
+    // Silent version for auto-load (no toast messages)
+    async function fetchFromSpreadsheetSilent() {
+      const url = localStorage.getItem(SHEET_URL_KEY) || DEFAULT_SHEET_URL;
+      if (!url) return null;
+
+      const sheetId = extractSheetId(url);
+      if (!sheetId) return null;
+
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+      const response = await fetch(csvUrl);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const csv = await response.text();
+      return parseSheetCSV(csv);
     }
 
     async function fetchFromSpreadsheet() {
