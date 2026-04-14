@@ -980,6 +980,28 @@
     }
 
     .modal-body { padding: 20px; }
+
+    .item-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 0.75rem;
+    }
+
+    .meta-id {
+      color: var(--self-color);
+      font-weight: 600;
+      font-family: monospace;
+    }
+
+    .meta-dates {
+      color: var(--text-muted);
+    }
+
     .form-group { margin-bottom: 20px; }
     .form-label { display: block; font-size: 0.875rem; color: var(--text-muted); margin-bottom: 8px; }
 
@@ -1352,6 +1374,12 @@
         <button class="modal-close" id="modalClose">×</button>
       </div>
       <div class="modal-body">
+        <!-- ID/日付情報（編集時のみ表示） -->
+        <div class="item-meta" id="itemMeta" style="display: none;">
+          <span class="meta-id" id="metaId"></span>
+          <span class="meta-dates" id="metaDates"></span>
+        </div>
+
         <div class="form-group">
           <label class="form-label">タイトル *</label>
           <input type="text" class="form-input" id="inputTitle" placeholder="悩み・課題名">
@@ -2098,6 +2126,7 @@
       resetForm();
       document.getElementById('modalTitle').textContent = '新規アイテム';
       document.getElementById('deleteBtn').style.display = 'none';
+      document.getElementById('itemMeta').style.display = 'none';
       openModal(document.getElementById('itemModal'));
     }
 
@@ -2105,11 +2134,19 @@
       editingItem = item;
       document.getElementById('modalTitle').textContent = 'アイテム編集';
       document.getElementById('deleteBtn').style.display = 'block';
+
+      // Show item meta information
+      document.getElementById('itemMeta').style.display = 'flex';
+      document.getElementById('metaId').textContent = item.id;
+      const createdAt = item.createdAt || '-';
+      const updatedAt = item.updatedAt || '-';
+      document.getElementById('metaDates').textContent = `作成: ${createdAt} / 更新: ${updatedAt}`;
+
       document.getElementById('inputTitle').value = item.title;
       document.getElementById('inputShortName').value = item.shortName || '';
-      document.getElementById('inputPerson').value = item.person;
-      document.getElementById('inputNextAction').value = item.nextAction;
-      document.getElementById('inputMemo').value = item.memo;
+      document.getElementById('inputPerson').value = item.person || '';
+      document.getElementById('inputNextAction').value = item.nextAction || '';
+      document.getElementById('inputMemo').value = item.memo || '';
       const importance = item.importanceScore ?? 50;
       const urgency = item.urgencyScore ?? 50;
       document.getElementById('inputImportance').value = importance;
