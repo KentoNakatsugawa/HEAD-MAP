@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="座.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&display=swap" rel="stylesheet">
+  <title>使い方 - 座 HEAD MAP</title>
+  <style>
+    :root {
+      --bg: #080b14;
+      --bg-card: #0e1120;
+      --bg-modal: #12162a;
+      --self-color: #5B8FFF;
+      --other-color: #D4A855;
+      --text: #e8e8f0;
+      --text-muted: #8888aa;
+      --border: #1a1d2e;
+
+      --fire: #E89B7B;
+      --design: #8AADFF;
+      --quick: #7BC99B;
+      --epoche: #AAAACC;
+      --watch: #E8C07B;
+      --monitor: #70B0FF;
+      --delegate: #7BC9B0;
+      --seed: #888888;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hiragino Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      background: rgba(8, 11, 20, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: #f5f3ef;
+      padding: 4px 12px 4px 6px;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+
+    .header h1 {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1.125rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #1a1a1a;
+    }
+
+    .back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .back-link:hover { color: var(--self-color); }
+
+    /* Main Content */
+    .main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-size: 0.9375rem;
+    }
+
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab-btn:first-child { border-radius: 8px 0 0 8px; }
+    .tab-btn:last-child { border-radius: 0 8px 8px 0; border-left: none; }
+
+    .tab-btn.active {
+      color: var(--text);
+      background: var(--bg-modal);
+    }
+
+    .tab-btn[data-tab="self"].active {
+      border-color: var(--self-color);
+      color: var(--self-color);
+    }
+
+    .tab-btn[data-tab="other"].active {
+      border-color: var(--other-color);
+      color: var(--other-color);
+    }
+
+    .tab-btn[data-tab="flow"].active {
+      border-color: var(--text);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Matrix Explanation */
+    .matrix-explain {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .matrix-explain-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .matrix-explain-title .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .matrix-explain-title .dot.self { background: var(--self-color); }
+    .matrix-explain-title .dot.other { background: var(--other-color); }
+
+    .matrix-explain-desc {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 20px;
+    }
+
+    /* Visual Matrix with Labels */
+    .visual-matrix {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      max-width: 400px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .matrix-axis {
+      position: absolute;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .axis-y {
+      left: -60px;
+      top: 50%;
+      transform: translateY(-50%) rotate(-90deg);
+      white-space: nowrap;
+    }
+
+    .axis-x {
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .matrix-quadrant {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .matrix-quadrant:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .quadrant-tl { top: 0; left: 0; border-right: 1px dashed var(--border); border-bottom: 1px dashed var(--border); }
+    .quadrant-tr { top: 0; right: 0; border-bottom: 1px dashed var(--border); }
+    .quadrant-bl { bottom: 0; left: 0; border-right: 1px dashed var(--border); }
+    .quadrant-br { bottom: 0; right: 0; }
+
+    .quadrant-emoji {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .quadrant-name {
+      font-size: 0.875rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .quadrant-desc {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Color coding */
+    .quadrant-fire .quadrant-name { color: var(--fire); }
+    .quadrant-design .quadrant-name { color: var(--design); }
+    .quadrant-quick .quadrant-name { color: var(--quick); }
+    .quadrant-epoche .quadrant-name { color: var(--epoche); }
+    .quadrant-watch .quadrant-name { color: var(--watch); }
+    .quadrant-monitor .quadrant-name { color: var(--monitor); }
+    .quadrant-delegate .quadrant-name { color: var(--delegate); }
+    .quadrant-seed .quadrant-name { color: var(--seed); }
+
+    /* Status List */
+    .status-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .status-card {
+      background: var(--bg-modal);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .status-card-emoji {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .status-card-content {
+      flex: 1;
+    }
+
+    .status-card-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .status-card-desc {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    /* Flow Animation Section */
+    .flow-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .flow-title {
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .flow-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      padding: 20px 0;
+    }
+
+    .flow-matrix {
+      width: 200px;
+      height: 200px;
+      background: var(--bg-modal);
+      border-radius: 12px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .flow-matrix-label {
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.875rem;
+      font-weight: 600;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .flow-matrix-label .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .flow-matrix.self { border: 2px solid var(--self-color); }
+    .flow-matrix.other { border: 2px solid var(--other-color); }
+    .flow-matrix.self .dot { background: var(--self-color); }
+    .flow-matrix.other .dot { background: var(--other-color); }
+
+    .flow-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .flow-arrow-icon {
+      font-size: 2rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: translateX(0); }
+      50% { opacity: 1; transform: translateX(8px); }
+    }
+
+    /* Moving dot animation */
+    .moving-dot {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: var(--fire);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--fire);
+      animation: moveDot 6s infinite ease-in-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.625rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    @keyframes moveDot {
+      0% {
+        left: calc(100% + 20px);
+        top: 25%;
+        background: var(--fire);
+        box-shadow: 0 0 12px var(--fire);
+      }
+      15% {
+        left: calc(100% + 20px);
+        top: 25%;
+        background: var(--fire);
+        box-shadow: 0 0 12px var(--fire);
+      }
+      30% {
+        left: calc(100% + 20px);
+        top: 65%;
+        background: var(--design);
+        box-shadow: 0 0 12px var(--design);
+      }
+      45% {
+        left: calc(100% + 20px);
+        top: 65%;
+        background: var(--design);
+        box-shadow: 0 0 12px var(--design);
+      }
+      60% {
+        left: calc(100% + 130px);
+        top: 65%;
+        background: var(--monitor);
+        box-shadow: 0 0 12px var(--monitor);
+      }
+      75% {
+        left: calc(100% + 130px);
+        top: 75%;
+        background: var(--seed);
+        box-shadow: 0 0 12px var(--seed);
+      }
+      100% {
+        left: calc(100% + 130px);
+        top: 75%;
+        background: var(--seed);
+        box-shadow: 0 0 12px var(--seed);
+      }
+    }
+
+    .flow-stages {
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .flow-stage {
+      background: var(--bg-modal);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .flow-stage-num {
+      width: 24px;
+      height: 24px;
+      background: var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin: 0 auto 8px;
+    }
+
+    .flow-stage-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .flow-stage-desc {
+      font-size: 0.625rem;
+      color: var(--text-muted);
+    }
+
+    .flow-stage:nth-child(1) .flow-stage-num { background: var(--fire); }
+    .flow-stage:nth-child(2) .flow-stage-num { background: var(--design); }
+    .flow-stage:nth-child(3) .flow-stage-num { background: var(--monitor); }
+    .flow-stage:nth-child(4) .flow-stage-num { background: var(--seed); }
+
+    /* Philosophy */
+    .philosophy {
+      background: linear-gradient(135deg, rgba(91, 143, 255, 0.1) 0%, rgba(212, 168, 85, 0.1) 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 32px;
+    }
+
+    .philosophy-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .philosophy-text {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    .philosophy-text strong {
+      color: var(--text);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .flow-visual {
+        flex-direction: column;
+        align-items: center;
+        gap: 60px;
+      }
+
+      .flow-arrow {
+        transform: rotate(90deg);
+      }
+
+      .flow-stages {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .moving-dot {
+        animation: moveDotMobile 6s infinite ease-in-out;
+      }
+
+      @keyframes moveDotMobile {
+        0%, 15% { left: 75%; top: calc(100% + 20px); }
+        30%, 45% { left: 25%; top: calc(100% + 20px); }
+        60% { left: 25%; top: calc(100% + 130px); }
+        75%, 100% { left: 75%; top: calc(100% + 130px); }
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <a href="index.html" class="header-logo">
+        <img src="座.png" alt="座">
+        <h1>HEAD MAP</h1>
+      </a>
+      <a href="index.html" class="back-link">← マトリクスに戻る</a>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="section">
+      <h2 class="section-title">HEAD MAPの使い方</h2>
+      <p class="section-desc">
+        HEAD MAPは「重要度」と「緊急度」の2軸で、タスクを整理するツールです。<br>
+        自分が直接行動する「自分Matrix」と、他者との協働で進める「座Matrix」の二層構造で、
+        効果的な権限委譲を実現します。
+      </p>
+
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="self">自分Matrix</button>
+        <button class="tab-btn" data-tab="other">座Matrix</button>
+        <button class="tab-btn" data-tab="flow">権限委譲の流れ</button>
+      </div>
+
+      <!-- 自分Matrix Tab -->
+      <div class="tab-content active" id="tab-self">
+        <div class="matrix-explain">
+          <div class="matrix-explain-title">
+            <span class="dot self"></span>
+            自分Matrix
+          </div>
+          <p class="matrix-explain-desc">
+            自分が直接行動するタスクを配置します。
+            緊急度の高いタスクが集中している場合は、座Matrixへの移譲を検討しましょう。
+          </p>
+
+          <div class="visual-matrix">
+            <span class="matrix-axis axis-y">← 重要度 →</span>
+            <span class="matrix-axis axis-x">← 緊急度 →</span>
+            <div class="matrix-quadrant quadrant-tl quadrant-design">
+              <span class="quadrant-emoji">🧭</span>
+              <span class="quadrant-name">DESIGN</span>
+              <span class="quadrant-desc">重要だが急がない<br>戦略的に設計・準備</span>
+            </div>
+            <div class="matrix-quadrant quadrant-tr quadrant-fire">
+              <span class="quadrant-emoji">🚨</span>
+              <span class="quadrant-name">FIRE</span>
+              <span class="quadrant-desc">重要かつ緊急<br>今すぐ対応すべき</span>
+            </div>
+            <div class="matrix-quadrant quadrant-bl quadrant-epoche">
+              <span class="quadrant-emoji">⚪</span>
+              <span class="quadrant-name">EPOCHÉ</span>
+              <span class="quadrant-desc">判断を保留<br>状況を見守る</span>
+            </div>
+            <div class="matrix-quadrant quadrant-br quadrant-quick">
+              <span class="quadrant-emoji">⚡</span>
+              <span class="quadrant-name">QUICK</span>
+              <span class="quadrant-desc">急ぐが重要度低<br>素早く片付ける</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-list">
+          <div class="status-card">
+            <span class="status-card-emoji">🚨</span>
+            <div class="status-card-content">
+              <div class="status-card-name" style="color: var(--fire)">FIRE（ファイア）</div>
+              <div class="status-card-desc">
+                重要度・緊急度ともに高い最優先事項。今すぐ自分が対応すべきタスク。
+                ここに多くのタスクが集中している場合は、チームのボトルネックになっている可能性があります。
+              </div>
+            </div>
+          </div>
+          <div class="status-card">
+            <span class="status-card-emoji">🧭</span>
+            <div class="status-card-content">
+              <div class="status-card-name" style="color: var(--design)">DESIGN（デザイン）</div>
+              <div class="status-card-desc">
+                重要だが緊急ではないタスク。戦略的に設計・準備を進める領域。
+                理想的には、このDESIGN領域のタスクを多く持つ状態を目指します。
+              </div>
+            </div>
+          </div>
+          <div class="status-card">
+            <span class="status-card-emoji">⚡</span>
+            <div class="status-card-content">
+              <div class="status-card-name" style="color: var(--quick)">QUICK（クイック）</div>
+              <div class="status-card-desc">
+                緊急だが重要度は低いタスク。素早く片付けて次に進むべき小タスク。
+                可能であれば他者に委任することも検討しましょう。
+              </div>
+            </div>
+          </div>
+          <div class="status-card">
+            <span class="status-card-emoji">⚪</span>
+            <div class="status-card-content">
+              <div class="status-card-name" style="color: var(--epoche)">EPOCHÉ（エポケー）</div>
+              <div class="status-card-desc">
+                判断を保留し、状況を見守るタスク。現時点では優先度が低いが、
+                状況が変われば重要度・緊急度が上がる可能性があるもの。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 座Matrix Tab -->
+      <div class="tab-content" id="tab-other">
+        <div class="matrix-explain">
+          <div class="matrix-explain-title">
+            <span class="dot other"></span>
+            座Matrix
+          </div>
+          <p class="matrix-explain-desc">
+            「座」とは、他者との関係性の中で生まれる創発の場。
+            単なる委任ではなく、協働・信頼・対話を通じて共に価値を創る空間です。
+          </p>
+
+          <div class="visual-matrix">
+            <span class="matrix-axis axis-y">← 重要度 →</span>
+            <span class="matrix-axis axis-x">← 緊急度 →</span>
+            <div class="matrix-quadrant quadrant-tl quadrant-monitor">
+              <span class="quadrant-emoji">🔭</span>
+              <span class="quadrant-name">MONITOR</span>
+              <span class="quadrant-desc">重要だが急がない<br>定期的に進捗確認</span>
+            </div>
+            <div class="matrix-quadrant quadrant-tr quadrant-watch">
+              <span class="quadrant-emoji">📡</span>
+              <span class="quadrant-name">WATCH</span>
+              <span class="quadrant-desc">重要かつ緊急<br>共に注視し介入準備</span>
+            </div>
+            <div class="matrix-quadrant quadrant-bl quadrant-seed">
+              <span class="quadrant-emoji">🌱</span>
+              <span class="quadrant-name">SEED</span>
+              <span class="quadrant-desc">種を蒔く<br>将来の芽吹きを待つ</span>
+            </div>
+            <div class="matrix-quadrant quadrant-br quadrant-delegate">
+              <span class="quadrant-emoji">📬</span>
+              <span class="quadrant-name">DELEGATE</span>
+              <span class="quadrant-desc">他者に委ねる<br>必要時のみサポート</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-list">
+          <div class="status-card">
+            <span class="status-card-emoji">📡</span>
+            <div class="status-card-content">
+              <div class="status-card-name" style="color: var(--watch)">WATCH（ウォッチ）</div>
+              <div class="status-card-desc">
+                重要度・緊急度ともに高いが、他者と協働で進めるタスク。
+                状況を共に注視し、適切なタイミングで介入できるよう準備しておきます。
+              </div>
+            </div>
+          </div>
+          <div class="status-card">
+            <span class="status-card-emoji">🔭</span>
+            <div class="status-card-content">
+              <div class="status-card-name" style="color: var(--monitor)">MONITOR（モニター）</div>
+              <div class="status-card-desc">
+                重要だが緊急ではない協働タスク。定期的に進捗を確認しながら見守ります。
+                権限委譲後の理想的な状態の一つです。
+              </div>
+            </div>
+          </div>
+          <div class="status-card">
+            <span class="status-card-emoji">📬</span>
+            <div class="status-card-content">
+              <div class="status-card-name" style="color: var(--delegate)">DELEGATE（デリゲート）</div>
+              <div class="status-card-desc">
+                緊急だが重要度は低いタスクを他者に委ねます。
+                必要な時のみサポートし、基本的には任せきります。
+              </div>
+            </div>
+          </div>
+          <div class="status-card">
+            <span class="status-card-emoji">🌱</span>
+            <div class="status-card-content">
+              <div class="status-card-name" style="color: var(--seed)">SEED（シード）</div>
+              <div class="status-card-desc">
+                種を蒔き、将来の芽吹きを待つタスク。
+                今は優先度が低いが、他者の成長や組織の発展につながる可能性を秘めたもの。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flow Tab -->
+      <div class="tab-content" id="tab-flow">
+        <div class="flow-container">
+          <div class="flow-title">タスクの流れ：自分から座へ</div>
+
+          <div class="flow-visual">
+            <div class="flow-matrix self">
+              <div class="flow-matrix-label"><span class="dot"></span> 自分Matrix</div>
+              <div class="moving-dot">P</div>
+            </div>
+            <div class="flow-arrow">
+              <span>権限委譲</span>
+              <span class="flow-arrow-icon">→</span>
+              <span>成長・信頼</span>
+            </div>
+            <div class="flow-matrix other">
+              <div class="flow-matrix-label"><span class="dot"></span> 座Matrix</div>
+            </div>
+          </div>
+
+          <div class="flow-stages">
+            <div class="flow-stage">
+              <div class="flow-stage-num">1</div>
+              <div class="flow-stage-title">FIRE</div>
+              <div class="flow-stage-desc">緊急対応<br>自分が主導</div>
+            </div>
+            <div class="flow-stage">
+              <div class="flow-stage-num">2</div>
+              <div class="flow-stage-title">DESIGN</div>
+              <div class="flow-stage-desc">仕組み化<br>引き継ぎ準備</div>
+            </div>
+            <div class="flow-stage">
+              <div class="flow-stage-num">3</div>
+              <div class="flow-stage-title">MONITOR</div>
+              <div class="flow-stage-desc">座へ移行<br>見守りながら支援</div>
+            </div>
+            <div class="flow-stage">
+              <div class="flow-stage-num">4</div>
+              <div class="flow-stage-title">SEED</div>
+              <div class="flow-stage-desc">完全委譲<br>成長を信じる</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="philosophy">
+          <div class="philosophy-title">運用の基本方針</div>
+          <p class="philosophy-text">
+            <strong>緊急度の高いタスクを自分が持っている状態は、チームのボトルネックになる。</strong><br><br>
+            目指す姿は、自分Matrixでは「重要だが緊急でない」タスク（DESIGN領域）を多く持つこと。
+            具体化してきたタスクは権限移譲を進め、緊急対応が落ち着いたら他者へ引き継げる形を整えましょう。<br><br>
+            プロジェクトは最初、自分のFIRE（緊急対応）として始まることが多いですが、
+            徐々にDESIGN（設計）→ 座のMONITOR（見守り）→ SEED（種蒔き）へと移行させていくことで、
+            自分のキャパシティを開放し、新しい挑戦に取り組む余裕が生まれます。
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Remove active from all tabs and contents
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        // Add active to clicked tab and corresponding content
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

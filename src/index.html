@@ -267,17 +267,23 @@
       line-height: 1.4;
     }
 
-    .overview-note {
-      font-size: 0.75rem;
-      color: var(--other-color);
+    .guide-link {
+      display: block;
       text-align: center;
       margin-top: 12px;
       padding-top: 12px;
       border-top: 1px solid var(--border);
-      font-style: italic;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-decoration: none;
+      transition: color 0.2s;
     }
 
-    /* Status Grid (分類説明) */
+    .guide-link:hover {
+      color: var(--self-color);
+    }
+
+    /* Status Grid (分類説明) - moved to guide.html */
     .status-grid {
       margin-top: 16px;
       padding: 12px;
@@ -1309,78 +1315,26 @@
     </div>
   </section>
 
-  <!-- Matrix Overview (説明) -->
+  <!-- Matrix Overview (簡易説明) -->
   <section class="matrix-overview">
     <div class="overview-content">
-      <p class="overview-lead">重要度と緊急度で整理する、二層のタスクマトリクス</p>
-
-      <!-- 自分Matrix説明 -->
-      <div class="status-grid self-statuses">
-        <div class="status-grid-title"><span class="dot self"></span> 自分Matrix</div>
-        <div class="status-item fire">
-          <span class="status-emoji">🚨</span>
-          <div class="status-info">
-            <strong>FIRE</strong>
-            <span>重要×緊急：今すぐ自分が対応すべき最優先事項</span>
+      <div class="overview-layers">
+        <div class="overview-layer self">
+          <span class="overview-dot"></span>
+          <div>
+            <strong>自分Matrix</strong>
+            <span class="overview-desc">自分が直接行動するタスク</span>
           </div>
         </div>
-        <div class="status-item design">
-          <span class="status-emoji">🧭</span>
-          <div class="status-info">
-            <strong>DESIGN</strong>
-            <span>重要×低緊急：戦略的に設計・準備を進めるタスク</span>
+        <div class="overview-layer other">
+          <span class="overview-dot"></span>
+          <div>
+            <strong>座Matrix</strong>
+            <span class="overview-desc">他者との協働・委任で進めるタスク</span>
           </div>
         </div>
-        <div class="status-item quick">
-          <span class="status-emoji">⚡</span>
-          <div class="status-info">
-            <strong>QUICK</strong>
-            <span>低重要×緊急：素早く片付ける小タスク</span>
-          </div>
-        </div>
-        <div class="status-item epoche">
-          <span class="status-emoji">⚪</span>
-          <div class="status-info">
-            <strong>EPOCHÉ</strong>
-            <span>低重要×低緊急：判断を保留し、状況を見守る</span>
-          </div>
-        </div>
+        <a href="guide.html" class="guide-link">使い方を見る →</a>
       </div>
-
-      <!-- 座Matrix説明 -->
-      <div class="status-grid other-statuses">
-        <div class="status-grid-title"><span class="dot other"></span> 座Matrix</div>
-        <div class="status-item watch">
-          <span class="status-emoji">📡</span>
-          <div class="status-info">
-            <strong>WATCH</strong>
-            <span>重要×緊急：共に注視し、適切なタイミングで介入</span>
-          </div>
-        </div>
-        <div class="status-item monitor">
-          <span class="status-emoji">🔭</span>
-          <div class="status-info">
-            <strong>MONITOR</strong>
-            <span>重要×低緊急：定期的に進捗を確認しながら見守る</span>
-          </div>
-        </div>
-        <div class="status-item delegate">
-          <span class="status-emoji">📬</span>
-          <div class="status-info">
-            <strong>DELEGATE</strong>
-            <span>低重要×緊急：他者に委ね、必要時のみサポート</span>
-          </div>
-        </div>
-        <div class="status-item seed">
-          <span class="status-emoji">🌱</span>
-          <div class="status-info">
-            <strong>SEED</strong>
-            <span>低重要×低緊急：種を蒔き、将来の芽吹きを待つ</span>
-          </div>
-        </div>
-      </div>
-
-      <p class="overview-note">緊急度が高いタスクが自分Matrixに集中している場合、座Matrixへの移譲を検討すべきサイン</p>
     </div>
   </section>
 
