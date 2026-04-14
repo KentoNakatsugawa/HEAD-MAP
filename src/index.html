@@ -2293,10 +2293,10 @@
         else if (lower === 'status' || header.includes('ステータス')) headerMap.status = i;
         else if (header.includes('重要') || lower === 'importance' || lower === 'importancescore') headerMap.importance = i;
         else if (header.includes('緊急') || lower === 'urgency' || lower === 'urgencyscore') headerMap.urgency = i;
-        else if (lower === 'person' || header.includes('関係者') || header.includes('担当')) headerMap.person = i;
+        else if (lower === 'person' || header.includes('関係者') || header.includes('担当') || header.includes('移譲先')) headerMap.person = i;
         else if (lower === 'nextaction' || lower === 'next' || header.includes('次') || header.includes('アクション')) headerMap.nextAction = i;
-        else if (lower === 'memo' || header.includes('メモ') || header.includes('備考')) headerMap.memo = i;
-        else if (lower === 'new' || lower === 'isnew' || header.includes('NEW') || header.includes('更新')) headerMap.isNew = i;
+        else if (lower === 'memo' || header.includes('メモ') || header.includes('備考') || header.includes('詳細')) headerMap.memo = i;
+        else if (lower === 'new' || lower === 'isnew' || header.includes('new flag') || header.includes('NEW') || header.includes('更新')) headerMap.isNew = i;
       });
 
       console.log('Detected headers:', headers);
@@ -2306,7 +2306,20 @@
         const values = parseCSVLine(lines[i]);
         if (values.length < 2) continue;
 
-        const id = headerMap.id !== undefined ? values[headerMap.id] : `HM-${String(i).padStart(3, '0')}`;
+        // Parse ID: convert numeric ID to HM-XXX format
+        let rawId = headerMap.id !== undefined ? values[headerMap.id]?.trim() : '';
+        let id;
+        if (!rawId) {
+          id = `HM-${String(i).padStart(3, '0')}`;
+        } else if (/^\d+$/.test(rawId)) {
+          // Numeric ID → convert to HM-XXX format
+          id = `HM-${String(parseInt(rawId, 10)).padStart(3, '0')}`;
+        } else if (rawId.startsWith('HM-')) {
+          id = rawId;
+        } else {
+          id = `HM-${String(i).padStart(3, '0')}`;
+        }
+
         const title = headerMap.title !== undefined ? values[headerMap.title] : '';
         if (!title) continue;
 
@@ -2345,7 +2358,7 @@
         const isNew = isNewLower === 'true' || isNewLower === '1' || isNewLower === 'yes' || isNewRaw === '✓' || isNewRaw === '○';
 
         newItems.push({
-          id: id || `HM-${String(i).padStart(3, '0')}`,
+          id: id,
           title: title,
           shortName: headerMap.shortName !== undefined ? values[headerMap.shortName]?.trim() || '' : '',
           layer: layer,

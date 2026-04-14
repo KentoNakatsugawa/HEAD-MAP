@@ -89,13 +89,21 @@ function getHeaderMap() {
 }
 
 // IDで行を検索
+// HM-XXX形式のIDと数字のみのIDの両方に対応
 function findRowById(sheet, idColumn, targetId) {
   const data = sheet.getDataRange().getValues();
-  const targetIdStr = String(targetId).trim();
+  let targetIdStr = String(targetId).trim();
+
+  // HM-XXX形式から数字を抽出（例: "HM-001" → "1"）
+  let targetNumeric = targetIdStr;
+  if (targetIdStr.startsWith('HM-')) {
+    targetNumeric = String(parseInt(targetIdStr.replace('HM-', ''), 10));
+  }
+
   for (let i = 1; i < data.length; i++) {
-    // 型の違いを吸収するため、両方とも文字列として比較
     const cellValue = String(data[i][idColumn]).trim();
-    if (cellValue === targetIdStr) {
+    // 完全一致、または数字部分の一致をチェック
+    if (cellValue === targetIdStr || cellValue === targetNumeric) {
       return i + 1; // 1-indexed
     }
   }
