@@ -1454,17 +1454,12 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">関係者</label>
-          <input type="text" class="form-input" id="inputPerson" placeholder="担当者・関係者名">
+          <label class="form-label">移譲先</label>
+          <input type="text" class="form-input" id="inputPerson" placeholder="移譲先の担当者名">
         </div>
 
         <div class="form-group">
-          <label class="form-label">次のアクション</label>
-          <input type="text" class="form-input" id="inputNextAction" placeholder="次の一手">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">メモ</label>
+          <label class="form-label">詳細</label>
           <textarea class="form-input" id="inputMemo" placeholder="補足・エポケー理由など"></textarea>
         </div>
       </div>
@@ -1520,7 +1515,7 @@
           </button>
           <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">
             ※ スプレッドシートは「リンクを知っている全員が閲覧可能」に設定してください<br>
-            ※ ヘッダー行: ID, title, shortName, layer, status, 重要度, 緊急度, person, nextAction, memo
+            ※ ヘッダー行: ID, タイトル, new flag, 自分フラグ, 緊急, 重要, 移譲先, 詳細
           </p>
         </div>
 
@@ -1720,7 +1715,6 @@
         importanceScore: itemData.importanceScore,
         urgencyScore: itemData.urgencyScore,
         person: itemData.person || '',
-        nextAction: itemData.nextAction || '',
         memo: itemData.memo || '',
         createdAt: getToday(),
         updatedAt: getToday()
@@ -1986,8 +1980,7 @@
             ${isHighPriority ? '<span class="badge badge-priority high">高優先</span>' : ''}
           </div>
           <h3 class="card-title">${escapeHtml(item.title)}</h3>
-          ${item.person ? `<div class="card-person">👤 ${escapeHtml(item.person)}</div>` : ''}
-          ${item.nextAction ? `<div class="card-next-action"><span class="arrow">→</span> ${escapeHtml(item.nextAction)}</div>` : ''}
+          ${item.person ? `<div class="card-person">📬 ${escapeHtml(item.person)}</div>` : ''}
           ${item.memo ? `<div class="card-memo">${escapeHtml(item.memo)}</div>` : ''}
           <div class="card-footer">
             <span class="card-id">${item.id}</span>
@@ -2111,7 +2104,6 @@
       document.getElementById('inputTitle').value = '';
       document.getElementById('inputShortName').value = '';
       document.getElementById('inputPerson').value = '';
-      document.getElementById('inputNextAction').value = '';
       document.getElementById('inputMemo').value = '';
       document.getElementById('inputImportance').value = 50;
       document.getElementById('importanceValue').textContent = '50';
@@ -2145,7 +2137,6 @@
       document.getElementById('inputTitle').value = item.title;
       document.getElementById('inputShortName').value = item.shortName || '';
       document.getElementById('inputPerson').value = item.person || '';
-      document.getElementById('inputNextAction').value = item.nextAction || '';
       document.getElementById('inputMemo').value = item.memo || '';
       const importance = item.importanceScore ?? 50;
       const urgency = item.urgencyScore ?? 50;
@@ -2169,7 +2160,6 @@
         importanceScore: parseInt(document.getElementById('inputImportance').value, 10),
         urgencyScore: parseInt(document.getElementById('inputUrgency').value, 10),
         person: document.getElementById('inputPerson').value.trim(),
-        nextAction: document.getElementById('inputNextAction').value.trim(),
         memo: document.getElementById('inputMemo').value.trim()
       };
     }
@@ -2294,7 +2284,6 @@
         else if (header.includes('重要') || lower === 'importance' || lower === 'importancescore') headerMap.importance = i;
         else if (header.includes('緊急') || lower === 'urgency' || lower === 'urgencyscore') headerMap.urgency = i;
         else if (lower === 'person' || header.includes('関係者') || header.includes('担当') || header.includes('移譲先')) headerMap.person = i;
-        else if (lower === 'nextaction' || lower === 'next' || header.includes('次') || header.includes('アクション')) headerMap.nextAction = i;
         else if (lower === 'memo' || header.includes('メモ') || header.includes('備考') || header.includes('詳細')) headerMap.memo = i;
         else if (lower === 'new' || lower === 'isnew' || header.includes('new flag') || header.includes('NEW') || header.includes('更新')) headerMap.isNew = i;
       });
@@ -2366,7 +2355,6 @@
           importanceScore: Math.max(0, Math.min(100, importance)),
           urgencyScore: Math.max(0, Math.min(100, urgency)),
           person: headerMap.person !== undefined ? values[headerMap.person]?.trim() || '' : '',
-          nextAction: headerMap.nextAction !== undefined ? values[headerMap.nextAction]?.trim() || '' : '',
           memo: headerMap.memo !== undefined ? values[headerMap.memo]?.trim() || '' : '',
           isNew: isNew,
           createdAt: getToday(),
