@@ -82,6 +82,7 @@ function getHeaderMap() {
     else if (header.includes('緊急') || header === 'urgency') map.urgency = i;
     else if (header === 'person' || header.includes('関係者') || header.includes('移譲先')) map.person = i;
     else if (header === 'memo' || header.includes('メモ') || header.includes('詳細')) map.memo = i;
+    else if (header === 'category' || header.includes('カテゴリ') || header.includes('分類')) map.category = i;
   });
 
   return { map, headers, sheet };
@@ -149,6 +150,9 @@ function updateItem(item) {
   if (map.memo !== undefined && item.memo !== undefined) {
     sheet.getRange(row, map.memo + 1).setValue(item.memo);
   }
+  if (map.category !== undefined && item.category !== undefined) {
+    sheet.getRange(row, map.category + 1).setValue(item.category);
+  }
 
   return { updated: item.id, row: row };
 }
@@ -187,6 +191,7 @@ function addItem(item) {
   if (map.urgency !== undefined) sheet.getRange(newRow, map.urgency + 1).setValue(item.urgencyScore || 50);
   if (map.person !== undefined) sheet.getRange(newRow, map.person + 1).setValue(item.person || '');
   if (map.memo !== undefined) sheet.getRange(newRow, map.memo + 1).setValue(item.memo || '');
+  if (map.category !== undefined) sheet.getRange(newRow, map.category + 1).setValue(item.category || '');
 
   return { added: newId, row: newRow };
 }

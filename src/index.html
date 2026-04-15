@@ -186,6 +186,40 @@
       border-color: var(--other-color);
     }
 
+    /* Category Filter */
+    .category-filter {
+      display: flex;
+      gap: 8px;
+      padding: 8px 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .category-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .category-btn:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .category-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
     /* Matrix Overview */
     .matrix-overview {
       padding: 16px;
@@ -720,6 +754,16 @@
       display: block;
     }
 
+    .dot-category {
+      display: inline-block;
+      padding: 1px 6px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 0.5rem;
+      margin-bottom: 2px;
+    }
+
     .dot-score {
       font-size: 0.5rem;
       color: var(--text-muted);
@@ -874,6 +918,7 @@
     .badge-priority { border: 1px solid var(--border); color: var(--text-muted); }
     .badge-priority.high { border-color: var(--fire); color: var(--fire); }
     .badge-score { border: 1px solid var(--border); color: var(--text-muted); font-family: monospace; }
+    .badge-category { background: var(--accent); color: #fff; }
 
     .card-title { font-weight: 600; font-size: 0.9375rem; margin-bottom: 10px; line-height: 1.4; }
 
@@ -1272,6 +1317,11 @@
     </button>
   </nav>
 
+  <!-- Category Filter -->
+  <div class="category-filter" id="categoryFilter">
+    <button class="category-btn active" data-category="">All</button>
+  </div>
+
   <!-- Matrix Visualization -->
   <section class="matrix-container">
     <div class="matrix-scene" id="matrixScene" data-focus="self">
@@ -1614,6 +1664,7 @@
 
     let items = [];
     let currentLayerFocus = 'self';
+    let currentCategory = '';
     let editingItem = null;
     let dataSource = 'none';
 
@@ -1773,6 +1824,36 @@
       });
     }
 
+    function setCategoryFilter(category) {
+      currentCategory = category;
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === category);
+      });
+      renderMatrix();
+    }
+
+    function updateCategoryButtons() {
+      const categories = [...new Set(items.map(item => item.category).filter(c => c))];
+      const container = document.getElementById('categoryFilter');
+
+      container.innerHTML = '<button class="category-btn active" data-category="">All</button>';
+
+      categories.sort().forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'category-btn';
+        btn.dataset.category = cat;
+        btn.textContent = cat;
+        container.appendChild(btn);
+      });
+
+      container.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => setCategoryFilter(btn.dataset.category));
+      });
+
+      // Hide filter if no categories
+      container.style.display = categories.length > 0 ? 'flex' : 'none';
+    }
+
     // Calculate auto-scaling bounds for a layer
     function calculateScaleBounds(layerItems) {
       if (layerItems.length === 0) {
@@ -1884,6 +1965,7 @@
             <span class="dot-name">${escapeHtml(shortName)}</span>
             <span class="dot-score">重${importance} / 緊${urgency}</span>
             <div class="dot-details">
+              ${item.category ? `<span class="dot-category">${escapeHtml(item.category)}</span>` : ''}
               ${item.person ? `👤 ${escapeHtml(item.person)}` : ''}
             </div>
           </div>
@@ -1895,9 +1977,14 @@
       const selfPlot = document.getElementById('selfMatrixPlot');
       const otherPlot = document.getElementById('otherMatrixPlot');
 
+      // Apply category filter
+      const filteredItems = currentCategory
+        ? items.filter(i => i.category === currentCategory)
+        : items;
+
       // Get items for each layer
-      const selfItems = items.filter(i => i.layer === 'self');
-      const otherItems = items.filter(i => i.layer === 'other');
+      const selfItems = filteredItems.filter(i => i.layer === 'self');
+      const otherItems = filteredItems.filter(i => i.layer === 'other');
 
       // Calculate auto-scaling bounds for each layer
       selfBounds = calculateScaleBounds(selfItems);
@@ -1975,6 +2062,7 @@
         <article class="card ${layerClass}" data-id="${item.id}">
           <div class="card-badges">
             ${isNew ? '<span class="badge badge-new">NEW</span>' : ''}
+            ${item.category ? `<span class="badge badge-category">${escapeHtml(item.category)}</span>` : ''}
             <span class="badge badge-status ${relativeStatus.toLowerCase()}">${config.emoji} ${config.label}</span>
             <span class="badge badge-score">重${importance} / 緊${urgency}</span>
             ${isHighPriority ? '<span class="badge badge-priority high">高優先</span>' : ''}
@@ -2093,6 +2181,7 @@
       const latestDate = items.reduce((latest, item) => item.updatedAt > latest ? item.updatedAt : latest, '');
       document.getElementById('updateDate').textContent = latestDate ? `📅 ${latestDate}` : '';
       updateDataSourceIndicator();
+      updateCategoryButtons();
       renderMatrix();
       renderMain();
     }
@@ -2286,6 +2375,7 @@
         else if (lower === 'person' || header.includes('関係者') || header.includes('担当') || header.includes('移譲先')) headerMap.person = i;
         else if (lower === 'memo' || header.includes('メモ') || header.includes('備考') || header.includes('詳細')) headerMap.memo = i;
         else if (lower === 'new' || lower === 'isnew' || header.includes('new flag') || header.includes('NEW') || header.includes('更新')) headerMap.isNew = i;
+        else if (lower === 'category' || header.includes('カテゴリ') || header.includes('分類')) headerMap.category = i;
       });
 
       console.log('Detected headers:', headers);
@@ -2356,6 +2446,7 @@
           urgencyScore: Math.max(0, Math.min(100, urgency)),
           person: headerMap.person !== undefined ? values[headerMap.person]?.trim() || '' : '',
           memo: headerMap.memo !== undefined ? values[headerMap.memo]?.trim() || '' : '',
+          category: headerMap.category !== undefined ? values[headerMap.category]?.trim() || '' : '',
           isNew: isNew,
           createdAt: getToday(),
           updatedAt: getToday()
