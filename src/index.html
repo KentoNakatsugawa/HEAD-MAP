@@ -2810,36 +2810,68 @@
       return match ? match[1] : null;
     }
 
-    function parseCSVLine(line) {
-      const result = [];
-      let current = '';
+    // Parse CSV with multiline support (handles quoted fields with newlines)
+    function parseCSV(csv) {
+      const rows = [];
+      let currentRow = [];
+      let currentField = '';
       let inQuotes = false;
 
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
+      for (let i = 0; i < csv.length; i++) {
+        const char = csv[i];
+        const nextChar = csv[i + 1];
+
         if (char === '"') {
-          if (inQuotes && line[i + 1] === '"') {
-            current += '"';
+          if (inQuotes && nextChar === '"') {
+            // Escaped quote
+            currentField += '"';
             i++;
           } else {
+            // Toggle quote mode
             inQuotes = !inQuotes;
           }
         } else if (char === ',' && !inQuotes) {
-          result.push(current.trim());
-          current = '';
+          // Field separator
+          currentRow.push(currentField.trim());
+          currentField = '';
+        } else if ((char === '\n' || (char === '\r' && nextChar === '\n')) && !inQuotes) {
+          // Row separator (not inside quotes)
+          if (char === '\r') i++; // Skip \n in \r\n
+          currentRow.push(currentField.trim());
+          if (currentRow.some(f => f)) { // Skip empty rows
+            rows.push(currentRow);
+          }
+          currentRow = [];
+          currentField = '';
+        } else if (char === '\r' && !inQuotes) {
+          // Handle standalone \r as row separator
+          currentRow.push(currentField.trim());
+          if (currentRow.some(f => f)) {
+            rows.push(currentRow);
+          }
+          currentRow = [];
+          currentField = '';
         } else {
-          current += char;
+          currentField += char;
         }
       }
-      result.push(current.trim());
-      return result;
+
+      // Don't forget the last field/row
+      if (currentField || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        if (currentRow.some(f => f)) {
+          rows.push(currentRow);
+        }
+      }
+
+      return rows;
     }
 
     function parseSheetCSV(csv) {
-      const lines = csv.split('\n').filter(line => line.trim());
-      if (lines.length < 2) return [];
+      const rows = parseCSV(csv);
+      if (rows.length < 2) return [];
 
-      const headers = parseCSVLine(lines[0]);
+      const headers = rows[0];
       const newItems = [];
 
       // Header mapping (flexible with partial matching)
@@ -2865,8 +2897,8 @@
       console.log('Detected headers:', headers);
       console.log('Header mapping:', headerMap);
 
-      for (let i = 1; i < lines.length; i++) {
-        const values = parseCSVLine(lines[i]);
+      for (let i = 1; i < rows.length; i++) {
+        const values = rows[i];
         if (values.length < 2) continue;
 
         // Parse ID: convert numeric ID to HM-XXX format
