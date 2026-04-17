@@ -196,70 +196,120 @@
 
     .layer-toggle-btn:first-child { border-radius: 10px 0 0 10px; }
 
-    /* Category Filter */
-    .category-filter {
-      display: flex;
-      gap: 8px;
+    /* Unified Filter Bar */
+    .filter-bar {
       padding: 8px 16px;
       max-width: 600px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .filter-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    /* Category Filter */
+    .category-filter {
+      display: flex;
+      gap: 6px;
       flex-wrap: wrap;
       justify-content: center;
     }
 
     .category-btn {
-      padding: 6px 14px;
+      padding: 5px 12px;
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 14px;
       background: var(--bg-card);
       color: var(--text-muted);
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       cursor: pointer;
       transition: all 0.2s;
       white-space: nowrap;
     }
 
     .category-btn:hover {
-      border-color: var(--accent);
+      border-color: var(--self-color);
       color: var(--text);
     }
 
     .category-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
+      background: var(--self-color);
+      border-color: var(--self-color);
       color: #fff;
     }
 
-    /* Update Filter */
-    .update-filter {
+    /* Flag Filter */
+    .flag-filter {
       display: flex;
-      gap: 8px;
-      padding: 4px 16px 8px;
-      max-width: 600px;
-      margin: 0 auto;
-      justify-content: center;
+      gap: 6px;
+      align-items: center;
     }
 
-    .update-filter-btn {
-      padding: 6px 14px;
+    .flag-btn {
+      padding: 5px 12px;
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 14px;
       background: var(--bg-card);
       color: var(--text-muted);
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .update-filter-btn:hover {
-      border-color: var(--fire);
+    .flag-btn:hover {
+      border-color: var(--text-muted);
       color: var(--text);
     }
 
-    .update-filter-btn.active {
+    .flag-btn.active.flag-new {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    .flag-btn.active.flag-update {
       background: var(--fire);
       border-color: var(--fire);
       color: #fff;
+    }
+
+    .flag-btn .flag-icon {
+      font-size: 0.8rem;
+    }
+
+    .flag-btn .flag-count {
+      font-size: 0.65rem;
+      opacity: 0.8;
     }
 
     /* Matrix Overview */
@@ -1432,8 +1482,7 @@
     @media (min-width: 768px) {
       .header-content,
       .layer-toggle,
-      .category-filter,
-      .update-filter,
+      .filter-bar,
       .status-list,
       .cards-container,
       .settings-modal-content {
@@ -1446,7 +1495,7 @@
       }
 
       .matrix-scene {
-        height: 400px;
+        height: 450px;
       }
 
       .matrix-layer {
@@ -1454,7 +1503,11 @@
       }
 
       .matrix-grid {
-        height: 320px;
+        height: 370px;
+      }
+
+      .matrix-plot {
+        min-height: 320px;
       }
 
       .axis-label {
@@ -1462,13 +1515,13 @@
       }
 
       .project-dot .dot-inner {
-        width: 48px;
-        height: 48px;
+        width: 52px;
+        height: 52px;
       }
 
       .dot-name {
         font-size: 0.7rem;
-        max-width: 80px;
+        max-width: 85px;
       }
 
       .layer-title {
@@ -1482,14 +1535,17 @@
       .card {
         padding: 16px;
       }
+
+      .filter-bar {
+        padding: 10px 24px;
+      }
     }
 
     /* Responsive - Large Desktop */
     @media (min-width: 1200px) {
       .header-content,
       .layer-toggle,
-      .category-filter,
-      .update-filter,
+      .filter-bar,
       .status-list,
       .cards-container,
       .settings-modal-content {
@@ -1502,21 +1558,25 @@
       }
 
       .matrix-scene {
-        height: 500px;
+        height: 550px;
       }
 
       .matrix-grid {
-        height: 420px;
+        height: 480px;
+      }
+
+      .matrix-plot {
+        min-height: 420px;
       }
 
       .project-dot .dot-inner {
-        width: 56px;
-        height: 56px;
+        width: 60px;
+        height: 60px;
       }
 
       .dot-name {
-        font-size: 0.75rem;
-        max-width: 100px;
+        font-size: 0.8rem;
+        max-width: 110px;
       }
 
       .layer-title {
@@ -1525,6 +1585,10 @@
 
       .header h1 {
         font-size: 1.5rem;
+      }
+
+      .filter-bar {
+        padding: 12px 32px;
       }
     }
   </style>
@@ -1561,15 +1625,29 @@
     </button>
   </nav>
 
-  <!-- Category Filter -->
-  <div class="category-filter" id="categoryFilter">
-    <button class="category-btn active" data-category="">All</button>
-  </div>
-
-  <!-- Update Filter -->
-  <div class="update-filter" id="updateFilter" style="display: none;">
-    <button class="update-filter-btn active" data-filter="all">すべて</button>
-    <button class="update-filter-btn" data-filter="updated">🔔 相談あり</button>
+  <!-- Unified Filter Bar -->
+  <div class="filter-bar" id="filterBar">
+    <!-- Flag Filters Row -->
+    <div class="filter-row" id="flagFilterRow" style="display: none;">
+      <div class="flag-filter" id="flagFilter">
+        <button class="flag-btn flag-new" data-flag="new" title="NEW">
+          <span class="flag-icon">🆕</span>
+          <span class="flag-label">NEW</span>
+          <span class="flag-count" id="newCount">(0)</span>
+        </button>
+        <button class="flag-btn flag-update" data-flag="update" title="相談あり">
+          <span class="flag-icon">🔔</span>
+          <span class="flag-label">相談</span>
+          <span class="flag-count" id="updateCount">(0)</span>
+        </button>
+      </div>
+    </div>
+    <!-- Category Filter Row -->
+    <div class="filter-row" id="categoryFilterRow" style="display: none;">
+      <div class="category-filter" id="categoryFilter">
+        <button class="category-btn active" data-category="">All</button>
+      </div>
+    </div>
   </div>
 
   <!-- All Matrix (全体表示) -->
@@ -1948,6 +2026,7 @@
     let items = [];
     let currentLayerFocus = 'self';
     let currentCategory = '';
+    let showNewOnly = false;
     let showUpdatedOnly = false;
     let editingItem = null;
     let dataSource = 'none';
@@ -2131,45 +2210,69 @@
       renderMatrix();
     }
 
-    function setUpdateFilter(filter) {
-      showUpdatedOnly = (filter === 'updated');
-      document.querySelectorAll('.update-filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.filter === filter);
-      });
+    function toggleFlagFilter(flag) {
+      if (flag === 'new') {
+        showNewOnly = !showNewOnly;
+        // Deactivate other flag if this one is activated
+        if (showNewOnly) showUpdatedOnly = false;
+      } else if (flag === 'update') {
+        showUpdatedOnly = !showUpdatedOnly;
+        if (showUpdatedOnly) showNewOnly = false;
+      }
+      updateFlagButtonStates();
       renderMatrix();
     }
 
-    function updateUpdateFilterVisibility() {
-      const hasUpdates = items.some(item => item.hasUpdate);
-      const container = document.getElementById('updateFilter');
-      container.style.display = hasUpdates ? 'flex' : 'none';
-
-      // Setup event listeners
-      container.querySelectorAll('.update-filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => setUpdateFilter(btn.dataset.filter));
+    function updateFlagButtonStates() {
+      document.querySelectorAll('.flag-btn').forEach(btn => {
+        const flag = btn.dataset.flag;
+        if (flag === 'new') {
+          btn.classList.toggle('active', showNewOnly);
+        } else if (flag === 'update') {
+          btn.classList.toggle('active', showUpdatedOnly);
+        }
       });
     }
 
-    function updateCategoryButtons() {
+    function updateFilterBar() {
+      const newCount = items.filter(item => item.isNew).length;
+      const updateCount = items.filter(item => item.hasUpdate).length;
       const categories = [...new Set(items.map(item => item.category).filter(c => c))];
-      const container = document.getElementById('categoryFilter');
 
-      container.innerHTML = '<button class="category-btn active" data-category="">All</button>';
+      // Update flag counts
+      document.getElementById('newCount').textContent = `(${newCount})`;
+      document.getElementById('updateCount').textContent = `(${updateCount})`;
+
+      // Show/hide flag filter row
+      const flagRow = document.getElementById('flagFilterRow');
+      flagRow.style.display = (newCount > 0 || updateCount > 0) ? 'flex' : 'none';
+
+      // Update category buttons
+      const categoryContainer = document.getElementById('categoryFilter');
+      categoryContainer.innerHTML = '<button class="category-btn active" data-category="">All</button>';
 
       categories.sort().forEach(cat => {
         const btn = document.createElement('button');
         btn.className = 'category-btn';
         btn.dataset.category = cat;
         btn.textContent = cat;
-        container.appendChild(btn);
+        categoryContainer.appendChild(btn);
       });
 
-      container.querySelectorAll('.category-btn').forEach(btn => {
+      // Show/hide category filter row
+      const categoryRow = document.getElementById('categoryFilterRow');
+      categoryRow.style.display = categories.length > 0 ? 'flex' : 'none';
+
+      // Setup event listeners
+      categoryContainer.querySelectorAll('.category-btn').forEach(btn => {
         btn.addEventListener('click', () => setCategoryFilter(btn.dataset.category));
       });
 
-      // Hide filter if no categories
-      container.style.display = categories.length > 0 ? 'flex' : 'none';
+      document.querySelectorAll('.flag-btn').forEach(btn => {
+        btn.onclick = () => toggleFlagFilter(btn.dataset.flag);
+      });
+
+      updateFlagButtonStates();
     }
 
     // Calculate auto-scaling bounds for a layer
@@ -2336,7 +2439,10 @@
         ? items.filter(i => i.category === currentCategory)
         : items;
 
-      // Apply update filter
+      // Apply flag filters
+      if (showNewOnly) {
+        filteredItems = filteredItems.filter(i => i.isNew);
+      }
       if (showUpdatedOnly) {
         filteredItems = filteredItems.filter(i => i.hasUpdate);
       }
@@ -2557,8 +2663,7 @@
       const latestDate = items.reduce((latest, item) => item.updatedAt > latest ? item.updatedAt : latest, '');
       document.getElementById('updateDate').textContent = latestDate ? `📅 ${latestDate}` : '';
       updateDataSourceIndicator();
-      updateCategoryButtons();
-      updateUpdateFilterVisibility();
+      updateFilterBar();
       renderMatrix();
       renderMain();
     }
