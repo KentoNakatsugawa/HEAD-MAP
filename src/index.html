@@ -495,9 +495,44 @@
       perspective: 1200px;
     }
 
+    /* Matrix Containers Wrapper */
+    .matrix-containers-wrapper {
+      position: relative;
+      min-height: 320px;
+    }
+
     /* All Matrix (全体表示) */
     .all-matrix-container {
       perspective: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      opacity: 0;
+      transform: scale(0.92) translateY(-10px);
+      pointer-events: none;
+      transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 0;
+    }
+
+    .all-matrix-container.active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    /* Layer container transition */
+    #layerMatrixContainer {
+      transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #layerMatrixContainer.layer-hidden {
+      opacity: 0;
+      transform: scale(1.08) translateY(10px);
+      pointer-events: none;
     }
 
     .all-matrix-container .matrix-layer.all-matrix {
@@ -1494,6 +1529,10 @@
         padding: 24px;
       }
 
+      .matrix-containers-wrapper {
+        min-height: 520px;
+      }
+
       .matrix-scene {
         height: 450px;
       }
@@ -1550,6 +1589,10 @@
       .cards-container,
       .settings-modal-content {
         max-width: 1100px;
+      }
+
+      .matrix-containers-wrapper {
+        min-height: 620px;
       }
 
       .matrix-container {
@@ -1650,8 +1693,10 @@
     </div>
   </div>
 
+  <!-- Matrix Containers Wrapper (for seamless transitions) -->
+  <div class="matrix-containers-wrapper" id="matrixWrapper">
   <!-- All Matrix (全体表示) -->
-  <section class="matrix-container all-matrix-container" id="allMatrixContainer" style="display: none;">
+  <section class="matrix-container all-matrix-container" id="allMatrixContainer">
     <div class="matrix-layer all-matrix" id="allMatrix">
       <div class="layer-title"><span class="dot all"></span> 全体Matrix</div>
       <div class="matrix-wrapper">
@@ -1747,6 +1792,7 @@
       </div>
     </div>
   </section>
+  </div><!-- End of matrix-containers-wrapper -->
 
   <!-- Matrix Overview (簡易説明) -->
   <section class="matrix-overview">
@@ -2187,11 +2233,13 @@
       const matrixScene = document.getElementById('matrixScene');
 
       if (layer === 'all') {
-        allContainer.style.display = 'block';
-        layerContainer.style.display = 'none';
+        // Seamless transition to all matrix
+        layerContainer.classList.add('layer-hidden');
+        allContainer.classList.add('active');
       } else {
-        allContainer.style.display = 'none';
-        layerContainer.style.display = 'block';
+        // Seamless transition to layer view
+        allContainer.classList.remove('active');
+        layerContainer.classList.remove('layer-hidden');
         matrixScene.dataset.focus = layer;
       }
 
@@ -2330,6 +2378,54 @@
       };
     }
 
+    // Calculate positions with offset for overlapping items
+    function calculatePositionsWithOffset(itemsList, bounds) {
+      const positionMap = new Map(); // key: "x,y" -> array of items
+      const THRESHOLD = 3; // percentage threshold for considering dots as overlapping
+      const OFFSET_STEP = 4; // percentage offset for each overlapping item
+
+      // First pass: calculate base positions and group overlapping items
+      itemsList.forEach(item => {
+        const basePos = getScorePosition(item, bounds);
+        const key = `${Math.round(basePos.x / THRESHOLD) * THRESHOLD},${Math.round(basePos.y / THRESHOLD) * THRESHOLD}`;
+
+        if (!positionMap.has(key)) {
+          positionMap.set(key, []);
+        }
+        positionMap.get(key).push({ item, basePos });
+      });
+
+      // Second pass: apply offsets to overlapping items (spiral pattern)
+      const finalPositions = new Map();
+      positionMap.forEach((group) => {
+        if (group.length === 1) {
+          // No overlap, use base position
+          finalPositions.set(group[0].item.id, group[0].basePos);
+        } else {
+          // Multiple items at same position - arrange in spiral
+          group.forEach((entry, index) => {
+            if (index === 0) {
+              // First item stays at center
+              finalPositions.set(entry.item.id, entry.basePos);
+            } else {
+              // Spiral offset: alternate directions
+              const angle = (index - 1) * (Math.PI / 3); // 60 degree increments
+              const radius = OFFSET_STEP * Math.ceil(index / 6);
+              const offsetX = Math.cos(angle) * radius;
+              const offsetY = Math.sin(angle) * radius;
+
+              finalPositions.set(entry.item.id, {
+                x: Math.max(3, Math.min(97, entry.basePos.x + offsetX)),
+                y: Math.max(3, Math.min(97, entry.basePos.y + offsetY))
+              });
+            }
+          });
+        }
+      });
+
+      return finalPositions;
+    }
+
     // Current bounds for each layer (set during render)
     let selfBounds = null;
     let otherBounds = null;
@@ -2367,11 +2463,13 @@
       return item.isNew === true;
     }
 
-    function renderProjectDot(item, bounds) {
+    function renderProjectDot(item, bounds, positions) {
       // Use relative status instead of stored status
       const relativeStatus = getRelativeStatus(item, bounds);
       const config = STATUS_CONFIG[relativeStatus];
-      const { x, y } = getScorePosition(item, bounds);
+      // Use pre-calculated position with offset
+      const pos = positions.get(item.id) || getScorePosition(item, bounds);
+      const { x, y } = pos;
       const shortName = item.shortName || item.title.slice(0, 6);
       const urgency = item.urgencyScore ?? 50;
       const importance = item.importanceScore ?? 50;
@@ -2397,10 +2495,12 @@
       `;
     }
 
-    function renderProjectDotForAll(item, bounds) {
+    function renderProjectDotForAll(item, bounds, positions) {
       const relativeStatus = getRelativeStatus(item, bounds);
       const config = STATUS_CONFIG[relativeStatus];
-      const { x, y } = getScorePosition(item, bounds);
+      // Use pre-calculated position with offset
+      const pos = positions.get(item.id) || getScorePosition(item, bounds);
+      const { x, y } = pos;
       const shortName = item.shortName || item.title.slice(0, 6);
       const urgency = item.urgencyScore ?? 50;
       const importance = item.importanceScore ?? 50;
@@ -2471,14 +2571,19 @@
         `;
       }
 
+      // Calculate positions with offset for overlapping items
+      const selfPositions = calculatePositionsWithOffset(selfItems, selfBounds);
+      const otherPositions = calculatePositionsWithOffset(otherItems, otherBounds);
+
       // Render All Matrix (全体)
       if (currentLayerFocus === 'all') {
         const allBounds = calculateScaleBounds(filteredItems);
+        const allPositions = calculatePositionsWithOffset(filteredItems, allBounds);
         const allLabels = allPlot.querySelector('.quadrant-labels').outerHTML;
 
         if (filteredItems.length > 0) {
           const dividers = renderQuadrantDividers(allBounds, 'all');
-          const dots = filteredItems.map(i => renderProjectDotForAll(i, allBounds)).join('');
+          const dots = filteredItems.map(i => renderProjectDotForAll(i, allBounds, allPositions)).join('');
           allPlot.innerHTML = allLabels + dividers + dots;
         } else {
           allPlot.innerHTML = allLabels + '<div class="plot-empty">アイテムなし</div>';
@@ -2492,7 +2597,7 @@
       // Render self layer dots with dividers
       if (selfItems.length > 0) {
         const dividers = renderQuadrantDividers(selfBounds, 'self');
-        const dots = selfItems.map(i => renderProjectDot(i, selfBounds)).join('');
+        const dots = selfItems.map(i => renderProjectDot(i, selfBounds, selfPositions)).join('');
         selfPlot.innerHTML = selfLabels + dividers + dots;
       } else {
         selfPlot.innerHTML = selfLabels + '<div class="plot-empty">アイテムなし</div>';
@@ -2501,7 +2606,7 @@
       // Render other layer dots with dividers
       if (otherItems.length > 0) {
         const dividers = renderQuadrantDividers(otherBounds, 'other');
-        const dots = otherItems.map(i => renderProjectDot(i, otherBounds)).join('');
+        const dots = otherItems.map(i => renderProjectDot(i, otherBounds, otherPositions)).join('');
         otherPlot.innerHTML = otherLabels + dividers + dots;
       } else {
         otherPlot.innerHTML = otherLabels + '<div class="plot-empty">アイテムなし</div>';
