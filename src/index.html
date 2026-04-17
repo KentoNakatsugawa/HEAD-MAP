@@ -2888,9 +2888,9 @@
         else if (header.includes('緊急') || lower === 'urgency' || lower === 'urgencyscore') headerMap.urgency = i;
         else if (lower === 'person' || header.includes('関係者') || header.includes('担当') || header.includes('移譲先')) headerMap.person = i;
         else if (lower === 'memo' || header.includes('メモ') || header.includes('備考') || header.includes('詳細')) headerMap.memo = i;
-        else if (lower === 'new' || lower === 'isnew' || header.includes('new flag') || header.includes('NEW')) headerMap.isNew = i;
+        else if (lower === 'new' || lower === 'isnew' || lower === 'new flag' || lower === 'newflag' || header.includes('new flag') || header.includes('NEW')) headerMap.isNew = i;
         else if (lower === 'category' || header.includes('カテゴリ') || header.includes('分類')) headerMap.category = i;
-        else if (lower === 'updated flag' || lower === 'updatedflag' || header.includes('updated flag') || header.includes('更新フラグ')) headerMap.hasUpdate = i;
+        else if (lower === 'update flag' || lower === 'updateflag' || lower === 'updated flag' || lower === 'updatedflag' || header.includes('update flag') || header.includes('updated flag') || header.includes('更新フラグ')) headerMap.hasUpdate = i;
         else if (lower === 'update detail' || lower === 'updatedetail' || header.includes('update detail') || header.includes('相談内容') || header.includes('更新内容')) headerMap.updateDetail = i;
       });
 
