@@ -2888,7 +2888,7 @@
 
         // Layer parsing: handle various formats (self/other, TRUE/FALSE, チェック, 1/0, etc.)
         // 「自分フラグ」カラム: TRUE/チェックあり → self(自分Matrix), FALSE/空 → other(座Matrix)
-        const layerRaw = headerMap.layer !== undefined ? values[headerMap.layer]?.trim() : '';
+        const layerRaw = (headerMap.layer !== undefined && values[headerMap.layer]) ? values[headerMap.layer].trim() : '';
         let layer = 'other'; // default: 座Matrix
         const layerLower = layerRaw.toLowerCase();
         // Check for "self" indicators (TRUE, 1, self, yes, チェック, etc.)
@@ -2901,9 +2901,9 @@
         }
         // Empty or FALSE → other (座Matrix)
 
-        const status = headerMap.status !== undefined ? values[headerMap.status]?.toUpperCase()?.trim() : 'FIRE';
-        const importanceRaw = headerMap.importance !== undefined ? values[headerMap.importance]?.trim() : '';
-        const urgencyRaw = headerMap.urgency !== undefined ? values[headerMap.urgency]?.trim() : '';
+        const status = (headerMap.status !== undefined && values[headerMap.status]) ? values[headerMap.status].toUpperCase().trim() : 'FIRE';
+        const importanceRaw = (headerMap.importance !== undefined && values[headerMap.importance]) ? values[headerMap.importance].trim() : '';
+        const urgencyRaw = (headerMap.urgency !== undefined && values[headerMap.urgency]) ? values[headerMap.urgency].trim() : '';
         const importance = parseInt(importanceRaw, 10) || 50;
         const urgency = parseInt(urgencyRaw, 10) || 50;
 
@@ -2916,29 +2916,29 @@
                            (layer === 'self' ? 'FIRE' : 'WATCH');
 
         // Parse isNew flag (TRUE, 1, yes, ✓, ○ → true)
-        const isNewRaw = headerMap.isNew !== undefined ? values[headerMap.isNew]?.trim() : '';
+        const isNewRaw = (headerMap.isNew !== undefined && values[headerMap.isNew]) ? values[headerMap.isNew].trim() : '';
         const isNewLower = isNewRaw.toLowerCase();
         const isNew = isNewLower === 'true' || isNewLower === '1' || isNewLower === 'yes' || isNewRaw === '✓' || isNewRaw === '○';
 
         // Parse hasUpdate flag (updated flag column)
-        const hasUpdateRaw = headerMap.hasUpdate !== undefined ? values[headerMap.hasUpdate]?.trim() : '';
+        const hasUpdateRaw = (headerMap.hasUpdate !== undefined && values[headerMap.hasUpdate]) ? values[headerMap.hasUpdate].trim() : '';
         const hasUpdateLower = hasUpdateRaw.toLowerCase();
         const hasUpdate = hasUpdateLower === 'true' || hasUpdateLower === '1' || hasUpdateLower === 'yes' || hasUpdateRaw === '✓' || hasUpdateRaw === '○';
 
         newItems.push({
           id: id,
           title: title,
-          shortName: headerMap.shortName !== undefined ? values[headerMap.shortName]?.trim() || '' : '',
+          shortName: (headerMap.shortName !== undefined && values[headerMap.shortName]) ? values[headerMap.shortName].trim() : '',
           layer: layer,
           status: validStatus,
           importanceScore: Math.max(0, Math.min(100, importance)),
           urgencyScore: Math.max(0, Math.min(100, urgency)),
-          person: headerMap.person !== undefined ? values[headerMap.person]?.trim() || '' : '',
-          memo: headerMap.memo !== undefined ? values[headerMap.memo]?.trim() || '' : '',
-          category: headerMap.category !== undefined ? values[headerMap.category]?.trim() || '' : '',
+          person: (headerMap.person !== undefined && values[headerMap.person]) ? values[headerMap.person].trim() : '',
+          memo: (headerMap.memo !== undefined && values[headerMap.memo]) ? values[headerMap.memo].trim() : '',
+          category: (headerMap.category !== undefined && values[headerMap.category]) ? values[headerMap.category].trim() : '',
           isNew: isNew,
           hasUpdate: hasUpdate,
-          updateDetail: headerMap.updateDetail !== undefined ? values[headerMap.updateDetail]?.trim() || '' : '',
+          updateDetail: (headerMap.updateDetail !== undefined && values[headerMap.updateDetail]) ? values[headerMap.updateDetail].trim() : '',
           createdAt: getToday(),
           updatedAt: getToday()
         });
