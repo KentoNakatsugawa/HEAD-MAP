@@ -1427,6 +1427,106 @@
     .policy-box strong {
       color: var(--self-color);
     }
+
+    /* Responsive - Tablet and Desktop */
+    @media (min-width: 768px) {
+      .header-content,
+      .layer-toggle,
+      .category-filter,
+      .update-filter,
+      .status-list,
+      .cards-container,
+      .settings-modal-content {
+        max-width: 900px;
+      }
+
+      .matrix-container {
+        max-width: 900px;
+        padding: 24px;
+      }
+
+      .matrix-scene {
+        height: 400px;
+      }
+
+      .matrix-layer {
+        padding: 24px;
+      }
+
+      .matrix-grid {
+        height: 320px;
+      }
+
+      .axis-label {
+        font-size: 0.8rem;
+      }
+
+      .project-dot .dot-inner {
+        width: 48px;
+        height: 48px;
+      }
+
+      .dot-name {
+        font-size: 0.7rem;
+        max-width: 80px;
+      }
+
+      .layer-title {
+        font-size: 0.875rem;
+      }
+
+      .cards-container {
+        gap: 16px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+    }
+
+    /* Responsive - Large Desktop */
+    @media (min-width: 1200px) {
+      .header-content,
+      .layer-toggle,
+      .category-filter,
+      .update-filter,
+      .status-list,
+      .cards-container,
+      .settings-modal-content {
+        max-width: 1100px;
+      }
+
+      .matrix-container {
+        max-width: 1100px;
+        padding: 32px;
+      }
+
+      .matrix-scene {
+        height: 500px;
+      }
+
+      .matrix-grid {
+        height: 420px;
+      }
+
+      .project-dot .dot-inner {
+        width: 56px;
+        height: 56px;
+      }
+
+      .dot-name {
+        font-size: 0.75rem;
+        max-width: 100px;
+      }
+
+      .layer-title {
+        font-size: 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
