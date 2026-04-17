@@ -170,6 +170,9 @@
 
     .layer-toggle-btn[data-layer="self"] .dot { background: var(--self-color); }
     .layer-toggle-btn[data-layer="other"] .dot { background: var(--other-color); }
+    .layer-toggle-btn[data-layer="all"] .dot.all {
+      background: linear-gradient(135deg, var(--self-color) 50%, var(--other-color) 50%);
+    }
 
     .layer-toggle-btn.active {
       color: var(--text);
@@ -185,6 +188,13 @@
       background: linear-gradient(135deg, rgba(212, 168, 85, 0.2) 0%, rgba(212, 168, 85, 0.05) 100%);
       border-color: var(--other-color);
     }
+
+    .layer-toggle-btn[data-layer="all"].active {
+      background: linear-gradient(135deg, rgba(91, 143, 255, 0.15) 0%, rgba(212, 168, 85, 0.15) 100%);
+      border-color: var(--accent);
+    }
+
+    .layer-toggle-btn:first-child { border-radius: 10px 0 0 10px; }
 
     /* Category Filter */
     .category-filter {
@@ -401,6 +411,37 @@
       margin: 0 auto;
       margin-bottom: 40px;
       perspective: 1200px;
+    }
+
+    /* All Matrix (全体表示) */
+    .all-matrix-container {
+      perspective: none;
+    }
+
+    .all-matrix-container .matrix-layer.all-matrix {
+      position: relative;
+      transform: none;
+      opacity: 1;
+      background: linear-gradient(135deg, rgba(15, 20, 40, 0.95) 0%, rgba(10, 15, 30, 0.92) 100%);
+      border: 2px solid var(--accent);
+      box-shadow: 0 12px 40px rgba(91, 143, 255, 0.15), 0 12px 40px rgba(212, 168, 85, 0.15);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .all-matrix .layer-title .dot.all {
+      background: linear-gradient(135deg, var(--self-color) 50%, var(--other-color) 50%);
+    }
+
+    /* Self/Other distinction in all matrix */
+    .all-matrix .project-dot.self-item .dot-inner {
+      border-color: var(--self-color);
+      box-shadow: 0 0 8px rgba(91, 143, 255, 0.3);
+    }
+
+    .all-matrix .project-dot.other-item .dot-inner {
+      border-color: var(--other-color);
+      box-shadow: 0 0 8px rgba(212, 168, 85, 0.3);
     }
 
     .matrix-scene {
@@ -762,6 +803,25 @@
       border-radius: 8px;
       font-size: 0.5rem;
       margin-bottom: 2px;
+    }
+
+    .dot-layer-badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 8px;
+      font-size: 0.5rem;
+      margin-bottom: 2px;
+      margin-right: 4px;
+    }
+
+    .self-item .dot-layer-badge {
+      background: var(--self-color);
+      color: #fff;
+    }
+
+    .other-item .dot-layer-badge {
+      background: var(--other-color);
+      color: #000;
     }
 
     .dot-score {
@@ -1307,6 +1367,10 @@
 
   <!-- Layer Toggle -->
   <nav class="layer-toggle">
+    <button class="layer-toggle-btn" data-layer="all">
+      <span class="dot all"></span>
+      <span>全体</span>
+    </button>
     <button class="layer-toggle-btn active" data-layer="self">
       <span class="dot"></span>
       <span>自分Matrix</span>
@@ -1322,8 +1386,41 @@
     <button class="category-btn active" data-category="">All</button>
   </div>
 
+  <!-- All Matrix (全体表示) -->
+  <section class="matrix-container all-matrix-container" id="allMatrixContainer" style="display: none;">
+    <div class="matrix-layer all-matrix" id="allMatrix">
+      <div class="layer-title"><span class="dot all"></span> 全体 Matrix</div>
+      <div class="matrix-wrapper">
+        <div class="y-axis">
+          <span class="y-axis-title">重要度</span>
+          <div class="y-axis-arrow">
+            <span class="axis-arrow">↑</span>
+            <span class="axis-high">高</span>
+          </div>
+        </div>
+        <div class="matrix-main">
+          <div class="matrix-plot" id="allMatrixPlot">
+            <div class="quadrant-labels">
+              <span class="quadrant-label tl">DESIGN / MONITOR</span>
+              <span class="quadrant-label tr">FIRE / WATCH</span>
+              <span class="quadrant-label bl">EPOCHÉ / SEED</span>
+              <span class="quadrant-label br">QUICK / DELEGATE</span>
+            </div>
+          </div>
+          <div class="x-axis">
+            <div class="x-axis-arrow">
+              <span class="axis-high">高</span>
+              <span class="axis-arrow">→</span>
+            </div>
+            <div class="x-axis-title">緊急度</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Matrix Visualization -->
-  <section class="matrix-container">
+  <section class="matrix-container" id="layerMatrixContainer">
     <div class="matrix-scene" id="matrixScene" data-focus="self">
       <!-- Other Layer (座 Matrix - 間/関係性) -->
       <div class="matrix-layer other" id="otherMatrix">
@@ -1818,10 +1915,25 @@
 
     function setLayerFocus(layer) {
       currentLayerFocus = layer;
-      document.getElementById('matrixScene').dataset.focus = layer;
+
+      const allContainer = document.getElementById('allMatrixContainer');
+      const layerContainer = document.getElementById('layerMatrixContainer');
+      const matrixScene = document.getElementById('matrixScene');
+
+      if (layer === 'all') {
+        allContainer.style.display = 'block';
+        layerContainer.style.display = 'none';
+      } else {
+        allContainer.style.display = 'none';
+        layerContainer.style.display = 'block';
+        matrixScene.dataset.focus = layer;
+      }
+
       document.querySelectorAll('.layer-toggle-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.layer === layer);
       });
+
+      renderMatrix();
     }
 
     function setCategoryFilter(category) {
@@ -1973,9 +2085,39 @@
       `;
     }
 
+    function renderProjectDotForAll(item, bounds) {
+      const relativeStatus = getRelativeStatus(item, bounds);
+      const config = STATUS_CONFIG[relativeStatus];
+      const { x, y } = getScorePosition(item, bounds);
+      const shortName = item.shortName || item.title.slice(0, 6);
+      const urgency = item.urgencyScore ?? 50;
+      const importance = item.importanceScore ?? 50;
+      const isNew = isNewItem(item);
+      const layerClass = item.layer === 'self' ? 'self-item' : 'other-item';
+      const layerIcon = item.layer === 'self' ? '◆' : '◇';
+
+      return `
+        <div class="project-dot ${layerClass}" data-id="${item.id}"
+             style="left: ${x}%; top: ${y}%;">
+          <div class="dot-inner ${relativeStatus.toLowerCase()}">
+            ${isNew ? '<span class="dot-new">NEW</span>' : ''}
+            <span class="dot-emoji">${config.emoji}</span>
+            <span class="dot-name">${escapeHtml(shortName)}</span>
+            <span class="dot-score">重${importance} / 緊${urgency}</span>
+            <div class="dot-details">
+              <span class="dot-layer-badge">${layerIcon} ${item.layer === 'self' ? '自分' : '座'}</span>
+              ${item.category ? `<span class="dot-category">${escapeHtml(item.category)}</span>` : ''}
+              ${item.person ? `👤 ${escapeHtml(item.person)}` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderMatrix() {
       const selfPlot = document.getElementById('selfMatrixPlot');
       const otherPlot = document.getElementById('otherMatrixPlot');
+      const allPlot = document.getElementById('allMatrixPlot');
 
       // Apply category filter
       const filteredItems = currentCategory
@@ -2004,6 +2146,20 @@
           <div class="quadrant-divider-h" style="top: ${midYPercent}%;"></div>
           <div class="quadrant-divider-v" style="left: ${midXPercent}%;"></div>
         `;
+      }
+
+      // Render All Matrix (全体)
+      if (currentLayerFocus === 'all') {
+        const allBounds = calculateScaleBounds(filteredItems);
+        const allLabels = allPlot.querySelector('.quadrant-labels').outerHTML;
+
+        if (filteredItems.length > 0) {
+          const dividers = renderQuadrantDividers(allBounds, 'all');
+          const dots = filteredItems.map(i => renderProjectDotForAll(i, allBounds)).join('');
+          allPlot.innerHTML = allLabels + dividers + dots;
+        } else {
+          allPlot.innerHTML = allLabels + '<div class="plot-empty">アイテムなし</div>';
+        }
       }
 
       // Preserve quadrant labels
@@ -2039,7 +2195,7 @@
       });
 
       // Layer click to switch focus
-      document.querySelectorAll('.matrix-layer').forEach(layer => {
+      document.querySelectorAll('.matrix-layer:not(.all-matrix)').forEach(layer => {
         layer.addEventListener('click', (e) => {
           if (e.target.closest('.project-dot')) return;
           const targetLayer = layer.classList.contains('self') ? 'self' : 'other';
