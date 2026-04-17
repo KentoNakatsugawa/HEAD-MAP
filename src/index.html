@@ -2956,10 +2956,27 @@
       if (!sheetId) return null;
 
       const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
-      const response = await fetch(csvUrl);
+      const response = await fetch(csvUrl, {
+        method: 'GET',
+        redirect: 'follow'
+      });
+
+      console.log('Silent fetch response:', {
+        ok: response.ok,
+        status: response.status,
+        type: response.type
+      });
+
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const csv = await response.text();
+
+      // Check if response is HTML instead of CSV
+      if (csv.trim().startsWith('<!DOCTYPE') || csv.trim().startsWith('<html')) {
+        console.error('Silent fetch: Received HTML instead of CSV');
+        throw new Error('Invalid response format');
+      }
+
       return parseSheetCSV(csv);
     }
 
@@ -2987,11 +3004,37 @@
       showToast('スプレッドシートを取得中...', '');
 
       try {
-        const response = await fetch(csvUrl);
+        const response = await fetch(csvUrl, {
+          method: 'GET',
+          redirect: 'follow'
+        });
+
+        console.log('Fetch response:', {
+          ok: response.ok,
+          status: response.status,
+          statusText: response.statusText,
+          type: response.type,
+          url: response.url
+        });
+
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+          if (response.status === 401 || response.status === 403) {
+            throw new Error('アクセス権限がありません。スプレッドシートの公開設定を確認してください。');
+          } else if (response.status === 404) {
+            throw new Error('スプレッドシートが見つかりません。URLを確認してください。');
+          } else {
+            throw new Error(`HTTPエラー: ${response.status} ${response.statusText}`);
+          }
         }
+
         const csv = await response.text();
+
+        // Check if response is HTML (error page) instead of CSV
+        if (csv.trim().startsWith('<!DOCTYPE') || csv.trim().startsWith('<html')) {
+          console.error('Received HTML instead of CSV:', csv.substring(0, 500));
+          throw new Error('CSVデータを取得できませんでした。スプレッドシートの公開設定を確認してください。');
+        }
+
         const newItems = parseSheetCSV(csv);
 
         if (newItems.length === 0) {
@@ -3007,7 +3050,15 @@
         closeModal(document.getElementById('settingsModal'));
       } catch (err) {
         console.error('Spreadsheet fetch error:', err);
-        showToast('取得に失敗しました。URLと公開設定を確認してください', 'error');
+
+        // Detect CORS errors
+        if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+          showToast('ネットワークエラー: CORSまたは接続の問題です', 'error');
+        } else if (err.message.startsWith('HTTPエラー') || err.message.startsWith('アクセス') || err.message.startsWith('スプレッドシートが') || err.message.startsWith('CSVデータ')) {
+          showToast(err.message, 'error');
+        } else {
+          showToast('取得に失敗しました。URLと公開設定を確認してください', 'error');
+        }
       }
     }
 
