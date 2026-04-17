@@ -1,5 +1,5 @@
 /**
- * HEAD MAP - Google Apps Script
+ * Fintech HEADMAP - Google Apps Script
  * スプレッドシートへの書き込みを受け付けるWebアプリ
  *
  * 設置手順:
@@ -9,7 +9,7 @@
  * 4. デプロイ > 新しいデプロイ > ウェブアプリ
  * 5. 「アクセスできるユーザー」を「全員」に設定
  * 6. デプロイしてURLをコピー
- * 7. HEAD MAPの設定でそのURLを入力
+ * 7. Fintech HEADMAPの設定でそのURLを入力
  */
 
 // 注: GAS WebアプリはCORSを自動的に処理するため、doOptionsは不要
@@ -19,7 +19,7 @@
 function doGet(e) {
   const output = JSON.stringify({
     success: true,
-    message: 'HEAD MAP GAS is running',
+    message: 'Fintech HEADMAP GAS is running',
     timestamp: new Date().toISOString()
   });
 
@@ -214,7 +214,7 @@ function deleteItem(id) {
   return { deleted: id };
 }
 
-// 全アイテム同期（HEAD MAP → スプレッドシート）
+// 全アイテム同期（Fintech HEADMAP → スプレッドシート）
 function syncAllItems(items) {
   const { map, sheet } = getHeaderMap();
 
