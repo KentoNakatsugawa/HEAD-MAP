@@ -83,6 +83,8 @@ function getHeaderMap() {
     else if (header === 'person' || header.includes('関係者') || header.includes('移譲先')) map.person = i;
     else if (header === 'memo' || header.includes('メモ') || header.includes('詳細')) map.memo = i;
     else if (header === 'category' || header.includes('カテゴリ') || header.includes('分類')) map.category = i;
+    else if (header === 'updated flag' || header === 'updatedflag' || header.includes('updated flag') || header.includes('更新フラグ')) map.hasUpdate = i;
+    else if (header === 'update detail' || header === 'updatedetail' || header.includes('update detail') || header.includes('相談内容') || header.includes('更新内容')) map.updateDetail = i;
   });
 
   return { map, headers, sheet };
@@ -153,6 +155,12 @@ function updateItem(item) {
   if (map.category !== undefined && item.category !== undefined) {
     sheet.getRange(row, map.category + 1).setValue(item.category);
   }
+  if (map.hasUpdate !== undefined && item.hasUpdate !== undefined) {
+    sheet.getRange(row, map.hasUpdate + 1).setValue(item.hasUpdate ? 'TRUE' : 'FALSE');
+  }
+  if (map.updateDetail !== undefined && item.updateDetail !== undefined) {
+    sheet.getRange(row, map.updateDetail + 1).setValue(item.updateDetail);
+  }
 
   return { updated: item.id, row: row };
 }
@@ -192,6 +200,8 @@ function addItem(item) {
   if (map.person !== undefined) sheet.getRange(newRow, map.person + 1).setValue(item.person || '');
   if (map.memo !== undefined) sheet.getRange(newRow, map.memo + 1).setValue(item.memo || '');
   if (map.category !== undefined) sheet.getRange(newRow, map.category + 1).setValue(item.category || '');
+  if (map.hasUpdate !== undefined) sheet.getRange(newRow, map.hasUpdate + 1).setValue(item.hasUpdate ? 'TRUE' : 'FALSE');
+  if (map.updateDetail !== undefined) sheet.getRange(newRow, map.updateDetail + 1).setValue(item.updateDetail || '');
 
   return { added: newId, row: newRow };
 }

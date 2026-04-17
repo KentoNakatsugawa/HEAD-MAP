@@ -230,6 +230,38 @@
       color: #fff;
     }
 
+    /* Update Filter */
+    .update-filter {
+      display: flex;
+      gap: 8px;
+      padding: 4px 16px 8px;
+      max-width: 600px;
+      margin: 0 auto;
+      justify-content: center;
+    }
+
+    .update-filter-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .update-filter-btn:hover {
+      border-color: var(--fire);
+      color: var(--text);
+    }
+
+    .update-filter-btn.active {
+      background: var(--fire);
+      border-color: var(--fire);
+      color: #fff;
+    }
+
     /* Matrix Overview */
     .matrix-overview {
       padding: 16px;
@@ -824,6 +856,37 @@
       color: #000;
     }
 
+    .dot-update {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      font-size: 0.6rem;
+      animation: pulse-update 1.5s infinite;
+    }
+
+    @keyframes pulse-update {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    .has-update .dot-inner {
+      box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+    }
+
+    .dot-update-detail {
+      margin-top: 4px;
+      padding: 4px 6px;
+      background: rgba(255, 107, 107, 0.2);
+      border-left: 2px solid var(--fire);
+      border-radius: 4px;
+      font-size: 0.55rem;
+      color: var(--text);
+      text-align: left;
+      white-space: normal;
+      max-width: 150px;
+      line-height: 1.3;
+    }
+
     .dot-score {
       font-size: 0.5rem;
       color: var(--text-muted);
@@ -979,6 +1042,23 @@
     .badge-priority.high { border-color: var(--fire); color: var(--fire); }
     .badge-score { border: 1px solid var(--border); color: var(--text-muted); font-family: monospace; }
     .badge-category { background: var(--accent); color: #fff; }
+    .badge-update { background: var(--fire); color: #fff; animation: pulse-new 2s infinite; }
+
+    .card.has-update {
+      border-color: var(--fire);
+      box-shadow: 0 0 12px rgba(255, 107, 107, 0.3);
+    }
+
+    .card-update-detail {
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      background: rgba(255, 107, 107, 0.1);
+      border-left: 3px solid var(--fire);
+      border-radius: 4px;
+      font-size: 0.8125rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
 
     .card-title { font-weight: 600; font-size: 0.9375rem; margin-bottom: 10px; line-height: 1.4; }
 
@@ -1386,6 +1466,12 @@
     <button class="category-btn active" data-category="">All</button>
   </div>
 
+  <!-- Update Filter -->
+  <div class="update-filter" id="updateFilter" style="display: none;">
+    <button class="update-filter-btn active" data-filter="all">すべて</button>
+    <button class="update-filter-btn" data-filter="updated">🔔 相談あり</button>
+  </div>
+
   <!-- All Matrix (全体表示) -->
   <section class="matrix-container all-matrix-container" id="allMatrixContainer" style="display: none;">
     <div class="matrix-layer all-matrix" id="allMatrix">
@@ -1762,6 +1848,7 @@
     let items = [];
     let currentLayerFocus = 'self';
     let currentCategory = '';
+    let showUpdatedOnly = false;
     let editingItem = null;
     let dataSource = 'none';
 
@@ -1944,6 +2031,25 @@
       renderMatrix();
     }
 
+    function setUpdateFilter(filter) {
+      showUpdatedOnly = (filter === 'updated');
+      document.querySelectorAll('.update-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+      });
+      renderMatrix();
+    }
+
+    function updateUpdateFilterVisibility() {
+      const hasUpdates = items.some(item => item.hasUpdate);
+      const container = document.getElementById('updateFilter');
+      container.style.display = hasUpdates ? 'flex' : 'none';
+
+      // Setup event listeners
+      container.querySelectorAll('.update-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => setUpdateFilter(btn.dataset.filter));
+      });
+    }
+
     function updateCategoryButtons() {
       const categories = [...new Set(items.map(item => item.category).filter(c => c))];
       const container = document.getElementById('categoryFilter');
@@ -2067,18 +2173,21 @@
       const urgency = item.urgencyScore ?? 50;
       const importance = item.importanceScore ?? 50;
       const isNew = isNewItem(item);
+      const hasUpdate = item.hasUpdate === true;
 
       return `
-        <div class="project-dot" data-id="${item.id}"
+        <div class="project-dot ${hasUpdate ? 'has-update' : ''}" data-id="${item.id}"
              style="left: ${x}%; top: ${y}%;">
           <div class="dot-inner ${relativeStatus.toLowerCase()}">
             ${isNew ? '<span class="dot-new">NEW</span>' : ''}
+            ${hasUpdate ? '<span class="dot-update">🔔</span>' : ''}
             <span class="dot-emoji">${config.emoji}</span>
             <span class="dot-name">${escapeHtml(shortName)}</span>
             <span class="dot-score">重${importance} / 緊${urgency}</span>
             <div class="dot-details">
               ${item.category ? `<span class="dot-category">${escapeHtml(item.category)}</span>` : ''}
               ${item.person ? `👤 ${escapeHtml(item.person)}` : ''}
+              ${item.updateDetail ? `<div class="dot-update-detail">💬 ${escapeHtml(item.updateDetail)}</div>` : ''}
             </div>
           </div>
         </div>
@@ -2093,14 +2202,16 @@
       const urgency = item.urgencyScore ?? 50;
       const importance = item.importanceScore ?? 50;
       const isNew = isNewItem(item);
+      const hasUpdate = item.hasUpdate === true;
       const layerClass = item.layer === 'self' ? 'self-item' : 'other-item';
       const layerIcon = item.layer === 'self' ? '◆' : '◇';
 
       return `
-        <div class="project-dot ${layerClass}" data-id="${item.id}"
+        <div class="project-dot ${layerClass} ${hasUpdate ? 'has-update' : ''}" data-id="${item.id}"
              style="left: ${x}%; top: ${y}%;">
           <div class="dot-inner ${relativeStatus.toLowerCase()}">
             ${isNew ? '<span class="dot-new">NEW</span>' : ''}
+            ${hasUpdate ? '<span class="dot-update">🔔</span>' : ''}
             <span class="dot-emoji">${config.emoji}</span>
             <span class="dot-name">${escapeHtml(shortName)}</span>
             <span class="dot-score">重${importance} / 緊${urgency}</span>
@@ -2108,6 +2219,7 @@
               <span class="dot-layer-badge">${layerIcon} ${item.layer === 'self' ? '自分' : '座'}</span>
               ${item.category ? `<span class="dot-category">${escapeHtml(item.category)}</span>` : ''}
               ${item.person ? `👤 ${escapeHtml(item.person)}` : ''}
+              ${item.updateDetail ? `<div class="dot-update-detail">💬 ${escapeHtml(item.updateDetail)}</div>` : ''}
             </div>
           </div>
         </div>
@@ -2120,9 +2232,14 @@
       const allPlot = document.getElementById('allMatrixPlot');
 
       // Apply category filter
-      const filteredItems = currentCategory
+      let filteredItems = currentCategory
         ? items.filter(i => i.category === currentCategory)
         : items;
+
+      // Apply update filter
+      if (showUpdatedOnly) {
+        filteredItems = filteredItems.filter(i => i.hasUpdate);
+      }
 
       // Get items for each layer
       const selfItems = filteredItems.filter(i => i.layer === 'self');
@@ -2213,11 +2330,13 @@
       const layerClass = item.layer === 'self' ? 'self-layer' : 'other-layer';
       const isHighPriority = importance >= 70 && urgency >= 70;
       const isNew = isNewItem(item);
+      const hasUpdate = item.hasUpdate === true;
 
       return `
-        <article class="card ${layerClass}" data-id="${item.id}">
+        <article class="card ${layerClass} ${hasUpdate ? 'has-update' : ''}" data-id="${item.id}">
           <div class="card-badges">
             ${isNew ? '<span class="badge badge-new">NEW</span>' : ''}
+            ${hasUpdate ? '<span class="badge badge-update">🔔 相談</span>' : ''}
             ${item.category ? `<span class="badge badge-category">${escapeHtml(item.category)}</span>` : ''}
             <span class="badge badge-status ${relativeStatus.toLowerCase()}">${config.emoji} ${config.label}</span>
             <span class="badge badge-score">重${importance} / 緊${urgency}</span>
@@ -2225,6 +2344,7 @@
           </div>
           <h3 class="card-title">${escapeHtml(item.title)}</h3>
           ${item.person ? `<div class="card-person">📬 ${escapeHtml(item.person)}</div>` : ''}
+          ${item.updateDetail ? `<div class="card-update-detail">💬 ${escapeHtml(item.updateDetail)}</div>` : ''}
           ${item.memo ? `<div class="card-memo">${escapeHtml(item.memo)}</div>` : ''}
           <div class="card-footer">
             <span class="card-id">${item.id}</span>
@@ -2338,6 +2458,7 @@
       document.getElementById('updateDate').textContent = latestDate ? `📅 ${latestDate}` : '';
       updateDataSourceIndicator();
       updateCategoryButtons();
+      updateUpdateFilterVisibility();
       renderMatrix();
       renderMain();
     }
@@ -2530,8 +2651,10 @@
         else if (header.includes('緊急') || lower === 'urgency' || lower === 'urgencyscore') headerMap.urgency = i;
         else if (lower === 'person' || header.includes('関係者') || header.includes('担当') || header.includes('移譲先')) headerMap.person = i;
         else if (lower === 'memo' || header.includes('メモ') || header.includes('備考') || header.includes('詳細')) headerMap.memo = i;
-        else if (lower === 'new' || lower === 'isnew' || header.includes('new flag') || header.includes('NEW') || header.includes('更新')) headerMap.isNew = i;
+        else if (lower === 'new' || lower === 'isnew' || header.includes('new flag') || header.includes('NEW')) headerMap.isNew = i;
         else if (lower === 'category' || header.includes('カテゴリ') || header.includes('分類')) headerMap.category = i;
+        else if (lower === 'updated flag' || lower === 'updatedflag' || header.includes('updated flag') || header.includes('更新フラグ')) headerMap.hasUpdate = i;
+        else if (lower === 'update detail' || lower === 'updatedetail' || header.includes('update detail') || header.includes('相談内容') || header.includes('更新内容')) headerMap.updateDetail = i;
       });
 
       console.log('Detected headers:', headers);
@@ -2592,6 +2715,11 @@
         const isNewLower = isNewRaw.toLowerCase();
         const isNew = isNewLower === 'true' || isNewLower === '1' || isNewLower === 'yes' || isNewRaw === '✓' || isNewRaw === '○';
 
+        // Parse hasUpdate flag (updated flag column)
+        const hasUpdateRaw = headerMap.hasUpdate !== undefined ? values[headerMap.hasUpdate]?.trim() : '';
+        const hasUpdateLower = hasUpdateRaw.toLowerCase();
+        const hasUpdate = hasUpdateLower === 'true' || hasUpdateLower === '1' || hasUpdateLower === 'yes' || hasUpdateRaw === '✓' || hasUpdateRaw === '○';
+
         newItems.push({
           id: id,
           title: title,
@@ -2604,6 +2732,8 @@
           memo: headerMap.memo !== undefined ? values[headerMap.memo]?.trim() || '' : '',
           category: headerMap.category !== undefined ? values[headerMap.category]?.trim() || '' : '',
           isNew: isNew,
+          hasUpdate: hasUpdate,
+          updateDetail: headerMap.updateDetail !== undefined ? values[headerMap.updateDetail]?.trim() || '' : '',
           createdAt: getToday(),
           updatedAt: getToday()
         });
