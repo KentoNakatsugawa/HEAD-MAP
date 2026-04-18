@@ -314,120 +314,255 @@
       box-shadow: 0 0 12px rgba(140, 130, 170, 0.6);
     }
 
-    /* Unified Filter Bar */
+    /* === New Filter Bar (Chip + Bottom Sheet) === */
     .filter-bar {
       padding: 8px 16px;
       max-width: 600px;
       margin: 0 auto;
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .filter-row {
-      display: flex;
+      align-items: center;
       gap: 8px;
       flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
     }
 
-    .filter-group {
+    /* Filter trigger button */
+    .filter-trigger {
       display: flex;
-      gap: 6px;
       align-items: center;
-    }
-
-    .filter-label {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      white-space: nowrap;
-    }
-
-    .filter-divider {
-      width: 1px;
-      height: 20px;
-      background: var(--border);
-      margin: 0 4px;
-    }
-
-    /* Category Filter */
-    .category-filter {
-      display: flex;
       gap: 6px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .category-btn {
-      padding: 5px 12px;
+      padding: 6px 12px;
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 20px;
       background: var(--bg-card);
       color: var(--text-muted);
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       cursor: pointer;
       transition: all 0.2s;
-      white-space: nowrap;
     }
 
-    .category-btn:hover {
+    .filter-trigger:hover {
       border-color: var(--self-color);
       color: var(--text);
     }
 
-    .category-btn.active {
+    .filter-trigger .filter-icon {
+      font-size: 0.9rem;
+    }
+
+    .filter-trigger.has-filters {
+      border-color: var(--self-color);
+      color: var(--self-color);
+    }
+
+    /* Active filter chips */
+    .active-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px 4px 10px;
+      border-radius: 16px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      cursor: default;
+      animation: chip-in 0.2s ease;
+    }
+
+    @keyframes chip-in {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .filter-chip.chip-new {
+      background: rgba(123, 201, 155, 0.2);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .filter-chip.chip-update {
+      background: rgba(232, 155, 123, 0.2);
+      color: var(--fire);
+      border: 1px solid var(--fire);
+    }
+
+    .filter-chip.chip-person {
+      background: rgba(91, 143, 255, 0.2);
+      color: var(--self-color);
+      border: 1px solid var(--self-color);
+    }
+
+    .filter-chip .chip-remove {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: inherit;
+      font-size: 0.6rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .filter-chip .chip-remove:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Clear all button */
+    .filter-clear-all {
+      padding: 4px 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .filter-clear-all:hover {
+      color: var(--danger);
+    }
+
+    /* === Filter Bottom Sheet === */
+    .filter-sheet-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .filter-sheet-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .filter-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-modal);
+      border-radius: 20px 20px 0 0;
+      padding: 0 0 env(safe-area-inset-bottom, 20px);
+      max-height: 70vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1001;
+    }
+
+    .filter-sheet-overlay.open .filter-sheet {
+      transform: translateY(0);
+    }
+
+    .filter-sheet-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 12px auto;
+    }
+
+    .filter-sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .filter-sheet-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .filter-sheet-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .filter-sheet-body {
+      padding: 16px 20px;
+    }
+
+    .filter-section {
+      margin-bottom: 20px;
+    }
+
+    .filter-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .filter-section-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .filter-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-option {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-option:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    .filter-option.selected {
       background: var(--self-color);
       border-color: var(--self-color);
       color: #fff;
     }
 
-    /* Flag Filter */
-    .flag-filter {
-      display: flex;
-      gap: 6px;
-      align-items: center;
+    .filter-option .option-icon {
+      font-size: 0.9rem;
     }
 
-    .flag-btn {
-      padding: 5px 12px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: var(--bg-card);
-      color: var(--text-muted);
+    .filter-option .option-count {
       font-size: 0.7rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .flag-btn:hover {
-      border-color: var(--text-muted);
-      color: var(--text);
-    }
-
-    .flag-btn.active.flag-new {
-      background: var(--success);
-      border-color: var(--success);
-      color: #fff;
-    }
-
-    .flag-btn.active.flag-update {
-      background: var(--fire);
-      border-color: var(--fire);
-      color: #fff;
-    }
-
-    .flag-btn .flag-icon {
-      font-size: 0.8rem;
-    }
-
-    .flag-btn .flag-count {
-      font-size: 0.65rem;
-      opacity: 0.8;
+      opacity: 0.7;
     }
 
     /* Matrix Overview */
@@ -1839,27 +1974,49 @@
     <div class="layer-indicator" id="layerIndicator"></div>
   </nav>
 
-  <!-- Unified Filter Bar -->
+  <!-- Filter Bar (Chip + Bottom Sheet) -->
   <div class="filter-bar" id="filterBar">
-    <!-- Flag Filters Row -->
-    <div class="filter-row" id="flagFilterRow" style="display: none;">
-      <div class="flag-filter" id="flagFilter">
-        <button class="flag-btn flag-new" data-flag="new" title="NEW">
-          <span class="flag-icon">🆕</span>
-          <span class="flag-label">NEW</span>
-          <span class="flag-count" id="newCount">(0)</span>
-        </button>
-        <button class="flag-btn flag-update" data-flag="update" title="相談あり">
-          <span class="flag-icon">🔔</span>
-          <span class="flag-label">相談</span>
-          <span class="flag-count" id="updateCount">(0)</span>
-        </button>
-      </div>
+    <button class="filter-trigger" id="filterTrigger">
+      <span class="filter-icon">⚙</span>
+      <span>フィルター</span>
+    </button>
+    <div class="active-filters" id="activeFilters">
+      <!-- Active filter chips will be inserted here -->
     </div>
-    <!-- Category Filter Row -->
-    <div class="filter-row" id="categoryFilterRow" style="display: none;">
-      <div class="category-filter" id="categoryFilter">
-        <button class="category-btn active" data-category="">All</button>
+  </div>
+
+  <!-- Filter Bottom Sheet -->
+  <div class="filter-sheet-overlay" id="filterSheetOverlay">
+    <div class="filter-sheet" id="filterSheet">
+      <div class="filter-sheet-handle"></div>
+      <div class="filter-sheet-header">
+        <span class="filter-sheet-title">フィルター</span>
+        <button class="filter-sheet-close" id="filterSheetClose">×</button>
+      </div>
+      <div class="filter-sheet-body">
+        <!-- Flag Filters -->
+        <div class="filter-section">
+          <div class="filter-section-title">フラグ</div>
+          <div class="filter-options" id="flagOptions">
+            <button class="filter-option" data-filter="new">
+              <span class="option-icon">🆕</span>
+              <span>NEW</span>
+              <span class="option-count" id="newCount">(0)</span>
+            </button>
+            <button class="filter-option" data-filter="update">
+              <span class="option-icon">🔔</span>
+              <span>相談</span>
+              <span class="option-count" id="updateCount">(0)</span>
+            </button>
+          </div>
+        </div>
+        <!-- Person Filter -->
+        <div class="filter-section">
+          <div class="filter-section-title">移譲先</div>
+          <div class="filter-options" id="personOptions">
+            <!-- Person options will be dynamically generated -->
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -2219,6 +2376,7 @@
     let currentCategory = '';
     let showNewOnly = false;
     let showUpdatedOnly = false;
+    let selectedPerson = ''; // 移譲先フィルター
     let editingItem = null;
     let dataSource = 'none';
 
@@ -2459,77 +2617,126 @@
       }
     }
 
-    function setCategoryFilter(category) {
-      currentCategory = category;
-      document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.category === category);
-      });
-      renderMatrix();
+    // === Filter Sheet Functions ===
+    function openFilterSheet() {
+      document.getElementById('filterSheetOverlay').classList.add('open');
+      updateFilterSheetState();
     }
 
-    function toggleFlagFilter(flag) {
-      if (flag === 'new') {
+    function closeFilterSheet() {
+      document.getElementById('filterSheetOverlay').classList.remove('open');
+    }
+
+    function toggleFilter(filterType, value) {
+      if (filterType === 'new') {
         showNewOnly = !showNewOnly;
-        // Deactivate other flag if this one is activated
         if (showNewOnly) showUpdatedOnly = false;
-      } else if (flag === 'update') {
+      } else if (filterType === 'update') {
         showUpdatedOnly = !showUpdatedOnly;
         if (showUpdatedOnly) showNewOnly = false;
+      } else if (filterType === 'person') {
+        selectedPerson = selectedPerson === value ? '' : value;
       }
-      updateFlagButtonStates();
+      updateFilterSheetState();
+      updateActiveFilterChips();
       renderMatrix();
     }
 
-    function updateFlagButtonStates() {
-      document.querySelectorAll('.flag-btn').forEach(btn => {
-        const flag = btn.dataset.flag;
-        if (flag === 'new') {
-          btn.classList.toggle('active', showNewOnly);
-        } else if (flag === 'update') {
-          btn.classList.toggle('active', showUpdatedOnly);
-        }
+    function clearFilter(filterType) {
+      if (filterType === 'new') showNewOnly = false;
+      else if (filterType === 'update') showUpdatedOnly = false;
+      else if (filterType === 'person') selectedPerson = '';
+      updateFilterSheetState();
+      updateActiveFilterChips();
+      renderMatrix();
+    }
+
+    function clearAllFilters() {
+      showNewOnly = false;
+      showUpdatedOnly = false;
+      selectedPerson = '';
+      updateFilterSheetState();
+      updateActiveFilterChips();
+      renderMatrix();
+    }
+
+    function updateFilterSheetState() {
+      // Update flag options
+      document.querySelectorAll('#flagOptions .filter-option').forEach(opt => {
+        const filter = opt.dataset.filter;
+        if (filter === 'new') opt.classList.toggle('selected', showNewOnly);
+        else if (filter === 'update') opt.classList.toggle('selected', showUpdatedOnly);
       });
+
+      // Update person options
+      document.querySelectorAll('#personOptions .filter-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.person === selectedPerson);
+      });
+    }
+
+    function updateActiveFilterChips() {
+      const container = document.getElementById('activeFilters');
+      const chips = [];
+
+      if (showNewOnly) {
+        chips.push(`<span class="filter-chip chip-new">
+          <span>🆕 NEW</span>
+          <button class="chip-remove" onclick="clearFilter('new')">×</button>
+        </span>`);
+      }
+      if (showUpdatedOnly) {
+        chips.push(`<span class="filter-chip chip-update">
+          <span>🔔 相談</span>
+          <button class="chip-remove" onclick="clearFilter('update')">×</button>
+        </span>`);
+      }
+      if (selectedPerson) {
+        chips.push(`<span class="filter-chip chip-person">
+          <span>👤 ${escapeHtml(selectedPerson)}</span>
+          <button class="chip-remove" onclick="clearFilter('person')">×</button>
+        </span>`);
+      }
+
+      // Add clear all button if there are active filters
+      if (chips.length > 1) {
+        chips.push(`<button class="filter-clear-all" onclick="clearAllFilters()">すべて解除</button>`);
+      }
+
+      container.innerHTML = chips.join('');
+
+      // Update trigger button state
+      const trigger = document.getElementById('filterTrigger');
+      trigger.classList.toggle('has-filters', chips.length > 0);
     }
 
     function updateFilterBar() {
       const newCount = items.filter(item => item.isNew).length;
       const updateCount = items.filter(item => item.hasUpdate).length;
-      const categories = [...new Set(items.map(item => item.category).filter(c => c))];
 
-      // Update flag counts
+      // Update counts in filter sheet
       document.getElementById('newCount').textContent = `(${newCount})`;
       document.getElementById('updateCount').textContent = `(${updateCount})`;
 
-      // Show/hide flag filter row
-      const flagRow = document.getElementById('flagFilterRow');
-      flagRow.style.display = (newCount > 0 || updateCount > 0) ? 'flex' : 'none';
+      // Get unique persons for person filter
+      const persons = [...new Set(items.map(item => item.person).filter(p => p && p.trim()))];
 
-      // Update category buttons
-      const categoryContainer = document.getElementById('categoryFilter');
-      categoryContainer.innerHTML = '<button class="category-btn active" data-category="">All</button>';
+      // Update person options
+      const personContainer = document.getElementById('personOptions');
+      if (persons.length > 0) {
+        personContainer.innerHTML = persons.sort().map(person => {
+          const count = items.filter(i => i.person === person).length;
+          const selected = selectedPerson === person ? 'selected' : '';
+          return `<button class="filter-option ${selected}" data-person="${escapeHtml(person)}" onclick="toggleFilter('person', '${escapeHtml(person)}')">
+            <span class="option-icon">👤</span>
+            <span>${escapeHtml(person)}</span>
+            <span class="option-count">(${count})</span>
+          </button>`;
+        }).join('');
+      } else {
+        personContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">移譲先が設定されたアイテムがありません</span>';
+      }
 
-      categories.sort().forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = 'category-btn';
-        btn.dataset.category = cat;
-        btn.textContent = cat;
-        categoryContainer.appendChild(btn);
-      });
-
-      // Show/hide category filter row
-      const categoryRow = document.getElementById('categoryFilterRow');
-      categoryRow.style.display = categories.length > 0 ? 'flex' : 'none';
-
-      // Setup event listeners
-      categoryContainer.querySelectorAll('.category-btn').forEach(btn => {
-        btn.addEventListener('click', () => setCategoryFilter(btn.dataset.category));
-      });
-
-      document.querySelectorAll('.flag-btn').forEach(btn => {
-        btn.onclick = () => toggleFlagFilter(btn.dataset.flag);
-      });
-
-      updateFlagButtonStates();
+      updateActiveFilterChips();
     }
 
     // Calculate auto-scaling bounds for a layer
@@ -2758,6 +2965,10 @@
       }
       if (showUpdatedOnly) {
         filteredItems = filteredItems.filter(i => i.hasUpdate);
+      }
+      // Apply person filter
+      if (selectedPerson) {
+        filteredItems = filteredItems.filter(i => i.person === selectedPerson);
       }
 
       // Get items for each layer
@@ -3593,16 +3804,20 @@
         });
       });
 
-      // Status buttons
-      document.querySelectorAll('#statusGroup .status-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('#statusGroup .status-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-        });
-      });
-
       // Quick Sync Button (in header)
       document.getElementById('syncSheetBtn').addEventListener('click', fetchFromSpreadsheet);
+
+      // Filter Sheet
+      document.getElementById('filterTrigger').addEventListener('click', openFilterSheet);
+      document.getElementById('filterSheetClose').addEventListener('click', closeFilterSheet);
+      document.getElementById('filterSheetOverlay').addEventListener('click', (e) => {
+        if (e.target.id === 'filterSheetOverlay') closeFilterSheet();
+      });
+
+      // Flag filter options
+      document.querySelectorAll('#flagOptions .filter-option').forEach(opt => {
+        opt.addEventListener('click', () => toggleFilter(opt.dataset.filter));
+      });
 
       // Settings Modal
       const settingsModal = document.getElementById('settingsModal');
