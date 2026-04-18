@@ -1284,6 +1284,34 @@
 
     .modal-body { padding: 20px; }
 
+    .detail-link-section {
+      margin-bottom: 16px;
+    }
+
+    .btn-detail-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, var(--self-color), #4070dd);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-detail-link:hover {
+      background: linear-gradient(135deg, #6a9fff, var(--self-color));
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(91, 143, 255, 0.4);
+    }
+
     .item-meta {
       display: flex;
       justify-content: space-between;
@@ -1873,6 +1901,13 @@
         <button class="modal-close" id="modalClose">×</button>
       </div>
       <div class="modal-body">
+        <!-- 詳細リンクボタン（編集時のみ、URLがある場合表示） -->
+        <div class="detail-link-section" id="detailLinkSection" style="display: none;">
+          <a class="btn btn-detail-link" id="detailLinkBtn" href="#" target="_blank">
+            🔗 詳細を開く
+          </a>
+        </div>
+
         <!-- 日付情報（編集時のみ表示） -->
         <div class="item-meta" id="itemMeta" style="display: none;">
           <span class="meta-dates" id="metaDates"></span>
@@ -1892,47 +1927,8 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">ステータス *</label>
-          <div class="status-grid" id="statusGroup">
-            <button class="status-btn active fire" data-status="FIRE">
-              <span class="emoji">🚨</span>
-              <span class="label">FIRE</span>
-            </button>
-            <button class="status-btn design" data-status="DESIGN">
-              <span class="emoji">🧭</span>
-              <span class="label">DESIGN</span>
-            </button>
-            <button class="status-btn quick" data-status="QUICK">
-              <span class="emoji">⚡</span>
-              <span class="label">QUICK</span>
-            </button>
-            <button class="status-btn epoche" data-status="EPOCHE">
-              <span class="emoji">⚪</span>
-              <span class="label">EPOCHÉ</span>
-            </button>
-            <button class="status-btn watch" data-status="WATCH">
-              <span class="emoji">📡</span>
-              <span class="label">WATCH</span>
-            </button>
-            <button class="status-btn monitor" data-status="MONITOR">
-              <span class="emoji">🔭</span>
-              <span class="label">MONITOR</span>
-            </button>
-            <button class="status-btn delegate" data-status="DELEGATE">
-              <span class="emoji">📬</span>
-              <span class="label">DELEGATE</span>
-            </button>
-            <button class="status-btn seed" data-status="SEED">
-              <span class="emoji">🌱</span>
-              <span class="label">SEED</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="form-group">
           <label class="form-label">詳細リンク</label>
           <input type="url" class="form-input" id="inputDetailUrl" placeholder="https://...">
-          <small class="form-hint">クリック時にこのURLを開きます</small>
         </div>
 
         <div class="form-row">
@@ -2212,7 +2208,6 @@
         id: generateId(),
         title: itemData.title,
         layer: itemData.layer,
-        status: itemData.status,
         importanceScore: itemData.importanceScore,
         urgencyScore: itemData.urgencyScore,
         detailUrl: itemData.detailUrl || '',
@@ -2726,14 +2721,7 @@
           e.stopPropagation();
           const id = dot.dataset.id;
           const item = items.find(i => i.id === id);
-          if (item) {
-            // If detailUrl exists, open it in new tab
-            if (item.detailUrl) {
-              window.open(item.detailUrl, '_blank');
-            } else {
-              openEditModal(item);
-            }
-          }
+          if (item) openEditModal(item);
         });
       });
 
@@ -2874,13 +2862,7 @@
         card.addEventListener('click', () => {
           const id = card.dataset.id;
           const item = items.find(i => i.id === id);
-          if (item) {
-            if (item.detailUrl) {
-              window.open(item.detailUrl, '_blank');
-            } else {
-              openEditModal(item);
-            }
-          }
+          if (item) openEditModal(item);
         });
       });
     }
@@ -2907,7 +2889,6 @@
       document.getElementById('inputUrgency').value = 50;
       document.getElementById('urgencyValue').textContent = '50';
       document.querySelectorAll('#layerGroup .radio-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.layer === 'self'));
-      document.querySelectorAll('#statusGroup .status-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.status === 'FIRE'));
     }
 
     function openAddModal() {
@@ -2916,6 +2897,7 @@
       document.getElementById('modalTitle').textContent = '新規アイテム';
       document.getElementById('deleteBtn').style.display = 'none';
       document.getElementById('itemMeta').style.display = 'none';
+      document.getElementById('detailLinkSection').style.display = 'none';
       openModal(document.getElementById('itemModal'));
     }
 
@@ -2923,6 +2905,16 @@
       editingItem = item;
       document.getElementById('modalTitle').textContent = 'アイテム編集';
       document.getElementById('deleteBtn').style.display = 'block';
+
+      // Show detail link button if URL exists
+      const detailLinkSection = document.getElementById('detailLinkSection');
+      const detailLinkBtn = document.getElementById('detailLinkBtn');
+      if (item.detailUrl) {
+        detailLinkSection.style.display = 'block';
+        detailLinkBtn.href = item.detailUrl;
+      } else {
+        detailLinkSection.style.display = 'none';
+      }
 
       // Show item meta information
       document.getElementById('itemMeta').style.display = 'flex';
@@ -2941,17 +2933,14 @@
       document.getElementById('inputUrgency').value = urgency;
       document.getElementById('urgencyValue').textContent = urgency;
       document.querySelectorAll('#layerGroup .radio-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.layer === item.layer));
-      document.querySelectorAll('#statusGroup .status-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.status === item.status));
       openModal(document.getElementById('itemModal'));
     }
 
     function getFormData() {
       const activeLayer = document.querySelector('#layerGroup .radio-btn.active');
-      const activeStatus = document.querySelector('#statusGroup .status-btn.active');
       return {
         title: document.getElementById('inputTitle').value.trim(),
         layer: activeLayer ? activeLayer.dataset.layer : 'self',
-        status: activeStatus ? activeStatus.dataset.status : 'FIRE',
         importanceScore: parseInt(document.getElementById('inputImportance').value, 10),
         urgencyScore: parseInt(document.getElementById('inputUrgency').value, 10),
         detailUrl: document.getElementById('inputDetailUrl').value.trim(),
@@ -3108,7 +3097,6 @@
         else if (lower === 'title' || header.includes('タイトル') || header.includes('プロジェクト名') || header.includes('名前')) headerMap.title = i;
         else if (lower === 'layer' || header.includes('レイヤー') || header.includes('自分フラグ') || header.includes('自分') || header.includes('マトリ')) headerMap.layer = i;
         else if (lower === 'detailurl' || lower === 'detail url' || lower === 'url' || lower === 'link' || header.includes('詳細リンク') || header.includes('リンク') || header.includes('URL')) headerMap.detailUrl = i;
-        else if (lower === 'status' || header.includes('ステータス')) headerMap.status = i;
         else if (header.includes('重要') || lower === 'importance' || lower === 'importancescore') headerMap.importance = i;
         else if (header.includes('緊急') || lower === 'urgency' || lower === 'urgencyscore') headerMap.urgency = i;
         else if (lower === 'person' || header.includes('関係者') || header.includes('担当') || header.includes('移譲先')) headerMap.person = i;
@@ -3158,19 +3146,12 @@
         }
         // Empty or FALSE → other (座Matrix)
 
-        const status = (headerMap.status !== undefined && values[headerMap.status]) ? values[headerMap.status].toUpperCase().trim() : 'FIRE';
         const importanceRaw = (headerMap.importance !== undefined && values[headerMap.importance]) ? values[headerMap.importance].trim() : '';
         const urgencyRaw = (headerMap.urgency !== undefined && values[headerMap.urgency]) ? values[headerMap.urgency].trim() : '';
         const importance = parseInt(importanceRaw, 10) || 50;
         const urgency = parseInt(urgencyRaw, 10) || 50;
 
-        // Debug: output all rows' layer and status data
-        const statusRaw = headerMap.status !== undefined ? values[headerMap.status] : '(no status column)';
-        console.log(`Row ${i}: title="${title}", layerRaw="${layerRaw}"→${layer}, statusRaw="${statusRaw}"→${status}→${Object.keys(STATUS_CONFIG).includes(status) ? status : 'FALLBACK'}`);
-
-        // Validate status
-        const validStatus = Object.keys(STATUS_CONFIG).includes(status) ? status :
-                           (layer === 'self' ? 'FIRE' : 'WATCH');
+        console.log(`Row ${i}: title="${title}", layerRaw="${layerRaw}"→${layer}, importance=${importance}, urgency=${urgency}`);
 
         // Parse isNew flag (TRUE, 1, yes, ✓, ○ → true)
         const isNewRaw = (headerMap.isNew !== undefined && values[headerMap.isNew]) ? values[headerMap.isNew].trim() : '';
@@ -3186,7 +3167,6 @@
           id: id,
           title: title,
           layer: layer,
-          status: validStatus,
           importanceScore: Math.max(0, Math.min(100, importance)),
           urgencyScore: Math.max(0, Math.min(100, urgency)),
           detailUrl: (headerMap.detailUrl !== undefined && values[headerMap.detailUrl]) ? values[headerMap.detailUrl].trim() : '',
