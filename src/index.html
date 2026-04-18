@@ -397,6 +397,12 @@
       border: 1px solid var(--self-color);
     }
 
+    .filter-chip.chip-category {
+      background: rgba(140, 130, 170, 0.2);
+      color: #b0b0d0;
+      border: 1px solid rgba(140, 130, 170, 0.6);
+    }
+
     .filter-chip .chip-remove {
       width: 14px;
       height: 14px;
@@ -2678,6 +2684,12 @@
           <button class="chip-remove" onclick="clearFilter('person')">×</button>
         </span>`);
       }
+      if (currentCategory) {
+        chips.push(`<span class="filter-chip chip-category">
+          <span>📁 ${escapeHtml(currentCategory)}</span>
+          <button class="chip-remove" onclick="clearFilter('category')">×</button>
+        </span>`);
+      }
 
       // Add clear all button if there are active filters
       if (chips.length > 1) {
@@ -2701,6 +2713,27 @@
 
       // Get unique persons for person filter
       const persons = [...new Set(items.map(item => item.person).filter(p => p && p.trim()))];
+
+      // Update category options - sort by count (descending)
+      const categories = [...new Set(items.map(item => item.category).filter(c => c && c.trim()))];
+      const categoryContainer = document.getElementById('categoryOptions');
+      if (categories.length > 0) {
+        const categoriesWithCount = categories.map(category => ({
+          category,
+          count: items.filter(i => i.category === category).length
+        })).sort((a, b) => b.count - a.count);
+
+        categoryContainer.innerHTML = categoriesWithCount.map(({ category, count }) => {
+          const selected = currentCategory === category ? 'selected' : '';
+          return `<button class="filter-option ${selected}" data-category="${escapeHtml(category)}" onclick="toggleFilter('category', '${escapeHtml(category)}')">
+            <span class="option-icon">📁</span>
+            <span>${escapeHtml(category)}</span>
+            <span class="option-count">(${count})</span>
+          </button>`;
+        }).join('');
+      } else {
+        categoryContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">カテゴリが設定されたアイテムがありません</span>';
+      }
 
       // Update person options - sort by count (descending)
       const personContainer = document.getElementById('personOptions');
