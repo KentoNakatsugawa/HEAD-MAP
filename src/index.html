@@ -317,12 +317,44 @@
     /* === New Filter Bar (Chip + Bottom Sheet) === */
     .filter-bar {
       padding: 8px 16px;
-      max-width: 600px;
+      max-width: 700px;
       margin: 0 auto;
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
+    }
+
+    /* Keyboard hints */
+    .keyboard-hints {
+      display: none;
+      margin-left: auto;
+      gap: 8px;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    @media (min-width: 768px) {
+      .keyboard-hints {
+        display: flex;
+      }
+    }
+
+    .keyboard-hints .hint {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .keyboard-hints kbd {
+      display: inline-block;
+      padding: 1px 4px;
+      font-family: inherit;
+      font-size: 0.6rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 3px;
     }
 
     /* Filter trigger button */
@@ -1998,6 +2030,13 @@
     <div class="active-filters" id="activeFilters">
       <!-- Active filter chips will be inserted here -->
     </div>
+    <div class="keyboard-hints">
+      <span class="hint"><kbd>F</kbd> フィルター</span>
+      <span class="hint"><kbd>N</kbd> NEW</span>
+      <span class="hint"><kbd>U</kbd> 相談</span>
+      <span class="hint"><kbd>C</kbd> クリア</span>
+      <span class="hint"><kbd>←→</kbd> ビュー切替</span>
+    </div>
   </div>
 
   <!-- Matrix Containers Wrapper -->
@@ -2589,10 +2628,42 @@
     // Keyboard navigation
     function handleKeydown(e) {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      // Navigation
       if (e.key === 'ArrowLeft') {
         navigateLayer(-1);
       } else if (e.key === 'ArrowRight') {
         navigateLayer(1);
+      }
+
+      // Filter shortcuts
+      else if (e.key === 'f' || e.key === 'F') {
+        // F: Open/close filter sheet
+        const overlay = document.getElementById('filterSheetOverlay');
+        if (overlay.classList.contains('open')) {
+          closeFilterSheet();
+        } else {
+          openFilterSheet();
+        }
+      } else if (e.key === 'n' || e.key === 'N') {
+        // N: Toggle NEW filter
+        toggleFilter('new');
+        renderMatrix();
+      } else if (e.key === 'u' || e.key === 'U') {
+        // U: Toggle Update/相談 filter
+        toggleFilter('update');
+        renderMatrix();
+      } else if (e.key === 'Escape') {
+        // Escape: Close filter sheet or clear all filters
+        const overlay = document.getElementById('filterSheetOverlay');
+        if (overlay.classList.contains('open')) {
+          closeFilterSheet();
+        } else if (showNewOnly || showUpdatedOnly || selectedPerson || currentCategory) {
+          clearAllFilters();
+        }
+      } else if (e.key === 'c' || e.key === 'C') {
+        // C: Clear all filters
+        clearAllFilters();
       }
     }
 
