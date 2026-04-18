@@ -2684,11 +2684,16 @@
       // Get unique persons for person filter
       const persons = [...new Set(items.map(item => item.person).filter(p => p && p.trim()))];
 
-      // Update person options
+      // Update person options - sort by count (descending)
       const personContainer = document.getElementById('personOptions');
       if (persons.length > 0) {
-        personContainer.innerHTML = persons.sort().map(person => {
-          const count = items.filter(i => i.person === person).length;
+        // Create array with counts and sort by count descending
+        const personsWithCount = persons.map(person => ({
+          person,
+          count: items.filter(i => i.person === person).length
+        })).sort((a, b) => b.count - a.count);
+
+        personContainer.innerHTML = personsWithCount.map(({ person, count }) => {
           const selected = selectedPerson === person ? 'selected' : '';
           return `<button class="filter-option ${selected}" data-person="${escapeHtml(person)}" onclick="toggleFilter('person', '${escapeHtml(person)}')">
             <span class="option-icon">👤</span>
