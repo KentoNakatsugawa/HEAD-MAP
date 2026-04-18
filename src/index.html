@@ -513,10 +513,66 @@
     .matrix-containers-wrapper {
       position: relative;
       min-height: 300px;
+    }
+
+    /* === All Matrix Container (統合ビュー) === */
+    .matrix-all {
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .matrix-all.hidden {
+      opacity: 0;
+      transform: scale(0.95);
+      pointer-events: none;
+      position: absolute;
+      top: 0; left: 0; right: 0;
+    }
+
+    .matrix-all .matrix-layer.all-matrix {
+      background: linear-gradient(135deg, rgba(20, 22, 35, 0.95) 0%, rgba(15, 18, 30, 0.92) 100%);
+      border: 2px solid rgba(140, 130, 170, 0.5);
+      box-shadow: 0 8px 32px rgba(91, 143, 255, 0.15), 0 8px 32px rgba(212, 168, 85, 0.15);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .matrix-all .layer-title {
+      color: #b0b0d0;
+    }
+
+    .matrix-all .layer-title .dot.all {
+      width: 10px; height: 10px;
+      background: linear-gradient(135deg, var(--self-color) 50%, var(--other-color) 50%);
+      box-shadow: 0 0 8px rgba(140, 130, 170, 0.5);
+    }
+
+    /* All Matrix: Self items have blue border */
+    .all-matrix .project-dot.self-item .dot-inner {
+      border-color: var(--self-color);
+      box-shadow: 0 0 6px rgba(91, 143, 255, 0.4);
+    }
+
+    /* All Matrix: Other items have gold border */
+    .all-matrix .project-dot.other-item .dot-inner {
+      border-color: var(--other-color);
+      box-shadow: 0 0 6px rgba(212, 168, 85, 0.4);
+    }
+
+    /* === Layer Matrix Container (個別ビュー) === */
+    .matrix-layers {
+      transition: opacity 0.5s ease, transform 0.5s ease;
       perspective: 1200px;
     }
 
-    /* Matrix Scene - contains 2 layers that merge/separate */
+    .matrix-layers.hidden {
+      opacity: 0;
+      transform: scale(1.05);
+      pointer-events: none;
+      position: absolute;
+      top: 0; left: 0; right: 0;
+    }
+
+    /* Matrix Scene - contains 2 layers */
     .matrix-scene {
       position: relative;
       height: 260px;
@@ -526,12 +582,15 @@
 
     /* Matrix Layer - Base styles */
     .matrix-layer {
-      position: absolute;
-      left: 0; right: 0; top: 0;
       padding: 14px;
       border-radius: 14px;
       transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
+    }
+
+    .matrix-layers .matrix-layer {
+      position: absolute;
+      left: 0; right: 0; top: 0;
       backface-visibility: hidden;
     }
 
@@ -549,90 +608,30 @@
       box-shadow: 0 8px 32px rgba(212, 168, 85, 0.25);
     }
 
-    /* ===== Focus: All (Default) - 両方を左右に並べて統合ビュー ===== */
-    .matrix-scene[data-focus="all"] .matrix-layer.self {
-      transform: translateZ(20px) translateX(-25%) translateY(0) scale(0.52);
-      opacity: 1;
-      z-index: 2;
-      border-color: rgba(91, 143, 255, 0.6);
-      box-shadow: 0 8px 24px rgba(91, 143, 255, 0.25);
-    }
-    .matrix-scene[data-focus="all"] .matrix-layer.other {
-      transform: translateZ(20px) translateX(25%) translateY(0) scale(0.52);
-      opacity: 1;
-      z-index: 2;
-      border-color: rgba(212, 168, 85, 0.6);
-      box-shadow: 0 8px 24px rgba(212, 168, 85, 0.25);
-    }
-    /* All mode: show individual layer titles */
-    .matrix-scene[data-focus="all"] .matrix-layer .layer-title {
-      opacity: 1;
-      transform: translateY(0);
-      font-size: 0.65rem;
-    }
-
-    /* ===== Focus: Self - 自分Matrixが抽出されて前面に ===== */
+    /* ===== Focus: Self - 自分Matrixが前面に ===== */
     .matrix-scene[data-focus="self"] .matrix-layer.self {
-      transform: translateZ(50px) translateX(-8%) translateY(15px) scale(1.02);
+      transform: translateZ(50px) translateY(15px);
       opacity: 1;
       z-index: 10;
-      border-color: rgba(91, 143, 255, 0.8);
-      box-shadow: 0 16px 48px rgba(91, 143, 255, 0.35);
     }
     .matrix-scene[data-focus="self"] .matrix-layer.other {
-      transform: translateZ(-30px) translateX(15%) translateY(-5px) scale(0.85);
-      opacity: 0.25;
+      transform: translateZ(-30px) translateY(-5px) scale(0.9);
+      opacity: 0.3;
       z-index: 1;
-      filter: blur(1px) saturate(0.5);
+      filter: blur(1px) saturate(0.6);
     }
 
-    /* ===== Focus: Other - 座Matrixが抽出されて前面に ===== */
+    /* ===== Focus: Other - 座Matrixが前面に ===== */
     .matrix-scene[data-focus="other"] .matrix-layer.self {
-      transform: translateZ(-30px) translateX(-15%) translateY(-5px) scale(0.85);
-      opacity: 0.25;
+      transform: translateZ(-30px) translateY(-5px) scale(0.9);
+      opacity: 0.3;
       z-index: 1;
-      filter: blur(1px) saturate(0.5);
+      filter: blur(1px) saturate(0.6);
     }
     .matrix-scene[data-focus="other"] .matrix-layer.other {
-      transform: translateZ(50px) translateX(8%) translateY(15px) scale(1.02);
+      transform: translateZ(50px) translateY(15px);
       opacity: 1;
       z-index: 10;
-      border-color: rgba(212, 168, 85, 0.8);
-      box-shadow: 0 16px 48px rgba(212, 168, 85, 0.35);
-    }
-
-    /* Unified Title (for All view) */
-    .unified-title {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #a0a0c0;
-      z-index: 20;
-      opacity: 0;
-      transform: translateY(-10px);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      pointer-events: none;
-    }
-
-    .unified-title .dot.all {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--self-color) 50%, var(--other-color) 50%);
-      box-shadow: 0 0 12px rgba(140, 130, 170, 0.6);
-      animation: pulse 2s infinite;
-    }
-
-    /* Hide unified title (we show individual layer titles instead) */
-    .matrix-scene[data-focus="all"] .unified-title {
-      opacity: 0;
-      transform: translateY(-10px);
     }
 
     /* Layer Title */
@@ -1716,32 +1715,26 @@
 
   <!-- Matrix Containers Wrapper -->
   <div class="matrix-containers-wrapper" id="matrixWrapper">
-  <!-- Matrix Visualization - 2 Layers (Self + Other) -->
-  <section class="matrix-container" id="matrixContainer">
-    <div class="matrix-scene" id="matrixScene" data-focus="all">
 
-      <!-- Unified Title (shown only in All view) -->
-      <div class="unified-title" id="unifiedTitle">
-        <span class="dot all"></span> 全体Matrix
-      </div>
-
-      <!-- Other Layer (Back - 座Matrix 間/関係性) -->
-      <div class="matrix-layer other" id="otherMatrix">
-        <div class="layer-title"><span class="dot"></span> 座Matrix</div>
+    <!-- ALL Matrix (統合ビュー - 全プロジェクトを1つのプロットに) -->
+    <section class="matrix-container matrix-all" id="allMatrixContainer">
+      <div class="matrix-layer all-matrix" id="allMatrix">
+        <div class="layer-title"><span class="dot all"></span> 全体Matrix</div>
         <div class="matrix-wrapper">
           <div class="y-axis">
+            <span class="y-axis-title">重要度</span>
             <div class="y-axis-arrow">
               <span class="axis-arrow">↑</span>
               <span class="axis-high">高</span>
             </div>
           </div>
           <div class="matrix-main">
-            <div class="matrix-plot" id="otherMatrixPlot">
+            <div class="matrix-plot" id="allMatrixPlot">
               <div class="quadrant-labels">
-                <span class="quadrant-label tl">MONITOR</span>
-                <span class="quadrant-label tr">WATCH</span>
-                <span class="quadrant-label bl">SEED</span>
-                <span class="quadrant-label br">DELEGATE</span>
+                <span class="quadrant-label tl">DESIGN/MONITOR</span>
+                <span class="quadrant-label tr">FIRE/WATCH</span>
+                <span class="quadrant-label bl">EPOCHÉ/SEED</span>
+                <span class="quadrant-label br">QUICK/DELEGATE</span>
               </div>
             </div>
             <div class="x-axis">
@@ -1749,14 +1742,51 @@
                 <span class="axis-high">高</span>
                 <span class="axis-arrow">→</span>
               </div>
+              <div class="x-axis-title">緊急度</div>
             </div>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Self Layer (Front - 自分Matrix) -->
-      <div class="matrix-layer self" id="selfMatrix">
-        <div class="layer-title"><span class="dot"></span> 自分Matrix</div>
+    <!-- Self/Other Matrix (個別ビュー) -->
+    <section class="matrix-container matrix-layers" id="layerMatrixContainer">
+      <div class="matrix-scene" id="matrixScene" data-focus="self">
+
+        <!-- Other Layer (Back - 座Matrix) -->
+        <div class="matrix-layer other" id="otherMatrix">
+          <div class="layer-title"><span class="dot"></span> 座Matrix</div>
+          <div class="matrix-wrapper">
+            <div class="y-axis">
+              <span class="y-axis-title">重要度</span>
+              <div class="y-axis-arrow">
+                <span class="axis-arrow">↑</span>
+                <span class="axis-high">高</span>
+              </div>
+            </div>
+            <div class="matrix-main">
+              <div class="matrix-plot" id="otherMatrixPlot">
+                <div class="quadrant-labels">
+                  <span class="quadrant-label tl">MONITOR</span>
+                  <span class="quadrant-label tr">WATCH</span>
+                  <span class="quadrant-label bl">SEED</span>
+                  <span class="quadrant-label br">DELEGATE</span>
+                </div>
+              </div>
+              <div class="x-axis">
+                <div class="x-axis-arrow">
+                  <span class="axis-high">高</span>
+                  <span class="axis-arrow">→</span>
+                </div>
+                <div class="x-axis-title">緊急度</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Self Layer (Front - 自分Matrix) -->
+        <div class="matrix-layer self" id="selfMatrix">
+          <div class="layer-title"><span class="dot"></span> 自分Matrix</div>
         <div class="matrix-wrapper">
           <div class="y-axis">
             <span class="y-axis-title">重要度</span>
@@ -2220,13 +2250,25 @@
       return { groups, selfBounds: sBounds, otherBounds: oBounds };
     }
 
+    // Layer order for swipe navigation: self -> all -> other
+    const LAYER_ORDER = ['self', 'all', 'other'];
+
     function setLayerFocus(layer) {
       currentLayerFocus = layer;
 
+      const allContainer = document.getElementById('allMatrixContainer');
+      const layerContainer = document.getElementById('layerMatrixContainer');
       const matrixScene = document.getElementById('matrixScene');
 
-      // Update matrix focus
-      matrixScene.dataset.focus = layer;
+      // Toggle between All Matrix and Layer Matrix views
+      if (layer === 'all') {
+        allContainer.classList.remove('hidden');
+        layerContainer.classList.add('hidden');
+      } else {
+        allContainer.classList.add('hidden');
+        layerContainer.classList.remove('hidden');
+        matrixScene.dataset.focus = layer;
+      }
 
       // Update tab states
       document.querySelectorAll('.layer-toggle-btn').forEach(btn => {
@@ -2244,12 +2286,57 @@
       const activeBtn = document.querySelector(`.layer-toggle-btn[data-layer="${layer}"]`);
 
       if (indicator && activeBtn) {
-        const btnRect = activeBtn.getBoundingClientRect();
-        const wrapperRect = activeBtn.parentElement.getBoundingClientRect();
-
         indicator.style.left = (activeBtn.offsetLeft) + 'px';
         indicator.style.width = activeBtn.offsetWidth + 'px';
         indicator.dataset.layer = layer;
+      }
+    }
+
+    // Navigate to next/previous layer
+    function navigateLayer(direction) {
+      const currentIndex = LAYER_ORDER.indexOf(currentLayerFocus);
+      let newIndex = currentIndex + direction;
+      if (newIndex < 0) newIndex = 0;
+      if (newIndex >= LAYER_ORDER.length) newIndex = LAYER_ORDER.length - 1;
+      if (newIndex !== currentIndex) {
+        setLayerFocus(LAYER_ORDER[newIndex]);
+      }
+    }
+
+    // Swipe detection
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const SWIPE_THRESHOLD = 50;
+
+    function handleTouchStart(e) {
+      touchStartX = e.changedTouches[0].screenX;
+    }
+
+    function handleTouchEnd(e) {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }
+
+    function handleSwipe() {
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > SWIPE_THRESHOLD) {
+        if (diff > 0) {
+          // Swipe left -> next (right)
+          navigateLayer(1);
+        } else {
+          // Swipe right -> previous (left)
+          navigateLayer(-1);
+        }
+      }
+    }
+
+    // Keyboard navigation
+    function handleKeydown(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft') {
+        navigateLayer(-1);
+      } else if (e.key === 'ArrowRight') {
+        navigateLayer(1);
       }
     }
 
@@ -2498,7 +2585,42 @@
       `;
     }
 
+    // Render dot for All Matrix (shows layer distinction)
+    function renderAllMatrixDot(item, bounds, positions) {
+      const relativeStatus = getRelativeStatus(item, bounds);
+      const config = STATUS_CONFIG[relativeStatus];
+      const pos = positions.get(item.id) || getScorePosition(item, bounds);
+      const { x, y } = pos;
+      const shortName = item.shortName || item.title.slice(0, 6);
+      const urgency = item.urgencyScore ?? 50;
+      const importance = item.importanceScore ?? 50;
+      const isNew = isNewItem(item);
+      const hasUpdate = item.hasUpdate === true;
+      const layerClass = item.layer === 'self' ? 'self-item' : 'other-item';
+      const layerLabel = item.layer === 'self' ? '自分' : '座';
+
+      return `
+        <div class="project-dot ${layerClass} ${hasUpdate ? 'has-update' : ''}" data-id="${item.id}"
+             style="left: ${x}%; top: ${y}%;">
+          <div class="dot-inner ${relativeStatus.toLowerCase()}">
+            ${isNew ? '<span class="dot-new">NEW</span>' : ''}
+            ${hasUpdate ? '<span class="dot-update">🔔</span>' : ''}
+            <span class="dot-emoji">${config.emoji}</span>
+            <span class="dot-name">${escapeHtml(shortName)}</span>
+            <span class="dot-score">重${importance} / 緊${urgency}</span>
+            <div class="dot-details">
+              <span class="dot-layer-badge">${layerLabel}</span>
+              ${item.category ? `<span class="dot-category">${escapeHtml(item.category)}</span>` : ''}
+              ${item.person ? `👤 ${escapeHtml(item.person)}` : ''}
+              ${item.updateDetail ? `<div class="dot-update-detail">💬 ${escapeHtml(item.updateDetail)}</div>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderMatrix() {
+      const allPlot = document.getElementById('allMatrixPlot');
       const selfPlot = document.getElementById('selfMatrixPlot');
       const otherPlot = document.getElementById('otherMatrixPlot');
 
@@ -2519,9 +2641,10 @@
       const selfItems = filteredItems.filter(i => i.layer === 'self');
       const otherItems = filteredItems.filter(i => i.layer === 'other');
 
-      // Calculate auto-scaling bounds for each layer
+      // Calculate auto-scaling bounds
       selfBounds = calculateScaleBounds(selfItems);
       otherBounds = calculateScaleBounds(otherItems);
+      const allBounds = calculateScaleBounds(filteredItems);
 
       // Helper to render quadrant dividers at median position
       function renderQuadrantDividers(bounds, layerClass) {
@@ -2542,10 +2665,21 @@
       // Calculate positions with offset for overlapping items
       const selfPositions = calculatePositionsWithOffset(selfItems, selfBounds);
       const otherPositions = calculatePositionsWithOffset(otherItems, otherBounds);
+      const allPositions = calculatePositionsWithOffset(filteredItems, allBounds);
 
       // Preserve quadrant labels
+      const allLabels = allPlot.querySelector('.quadrant-labels').outerHTML;
       const selfLabels = selfPlot.querySelector('.quadrant-labels').outerHTML;
       const otherLabels = otherPlot.querySelector('.quadrant-labels').outerHTML;
+
+      // Render All Matrix (統合ビュー - 全プロジェクト)
+      if (filteredItems.length > 0) {
+        const dividers = renderQuadrantDividers(allBounds, 'all');
+        const dots = filteredItems.map(i => renderAllMatrixDot(i, allBounds, allPositions)).join('');
+        allPlot.innerHTML = allLabels + dividers + dots;
+      } else {
+        allPlot.innerHTML = allLabels + '<div class="plot-empty">アイテムなし</div>';
+      }
 
       // Render self layer dots with dividers
       if (selfItems.length > 0) {
@@ -2575,11 +2709,10 @@
         });
       });
 
-      // Layer click to switch focus (only for self/other focus modes)
-      document.querySelectorAll('.matrix-layer').forEach(layer => {
+      // Layer click to switch focus
+      document.querySelectorAll('.matrix-layers .matrix-layer').forEach(layer => {
         layer.addEventListener('click', (e) => {
           if (e.target.closest('.project-dot')) return;
-          // In 'all' mode, clicking a layer focuses it
           const targetLayer = layer.classList.contains('self') ? 'self' : 'other';
           setLayerFocus(targetLayer);
         });
@@ -3419,6 +3552,14 @@
       // Initialize layer indicator position
       setTimeout(() => updateLayerIndicator(currentLayerFocus), 100);
       window.addEventListener('resize', () => updateLayerIndicator(currentLayerFocus));
+
+      // Swipe navigation for matrix
+      const matrixWrapper = document.getElementById('matrixWrapper');
+      matrixWrapper.addEventListener('touchstart', handleTouchStart, { passive: true });
+      matrixWrapper.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+      // Keyboard navigation (arrow keys)
+      document.addEventListener('keydown', handleKeydown);
 
       loadData();
     });
