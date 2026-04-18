@@ -966,6 +966,22 @@
       animation: pulse-update 1.5s infinite;
     }
 
+    .dot-link {
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      font-size: 0.5rem;
+      opacity: 0.7;
+    }
+
+    .project-dot.has-link {
+      cursor: pointer;
+    }
+
+    .project-dot.has-link:hover .dot-link {
+      opacity: 1;
+    }
+
     @keyframes pulse-update {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.2); }
@@ -1307,6 +1323,7 @@
     .form-input:focus { outline: none; border-color: var(--self-color); }
     .form-input::placeholder { color: var(--text-muted); }
     textarea.form-input { resize: vertical; min-height: 80px; }
+    .form-hint { display: block; margin-top: 4px; font-size: 0.7rem; color: var(--text-muted); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
     .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -1856,9 +1873,8 @@
         <button class="modal-close" id="modalClose">×</button>
       </div>
       <div class="modal-body">
-        <!-- ID/日付情報（編集時のみ表示） -->
+        <!-- 日付情報（編集時のみ表示） -->
         <div class="item-meta" id="itemMeta" style="display: none;">
-          <span class="meta-id" id="metaId"></span>
           <span class="meta-dates" id="metaDates"></span>
         </div>
 
@@ -1914,8 +1930,9 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">ショートネーム（表示用）</label>
-          <input type="text" class="form-input" id="inputShortName" placeholder="6文字以内の略称" maxlength="10">
+          <label class="form-label">詳細リンク</label>
+          <input type="url" class="form-input" id="inputDetailUrl" placeholder="https://...">
+          <small class="form-hint">クリック時にこのURLを開きます</small>
         </div>
 
         <div class="form-row">
@@ -2194,11 +2211,11 @@
       const newItem = {
         id: generateId(),
         title: itemData.title,
-        shortName: itemData.shortName || '',
         layer: itemData.layer,
         status: itemData.status,
         importanceScore: itemData.importanceScore,
         urgencyScore: itemData.urgencyScore,
+        detailUrl: itemData.detailUrl || '',
         person: itemData.person || '',
         memo: itemData.memo || '',
         createdAt: getToday(),
@@ -2560,18 +2577,20 @@
       // Use pre-calculated position with offset
       const pos = positions.get(item.id) || getScorePosition(item, bounds);
       const { x, y } = pos;
-      const shortName = item.shortName || item.title.slice(0, 6);
+      const shortName = item.title.slice(0, 6);
       const urgency = item.urgencyScore ?? 50;
       const importance = item.importanceScore ?? 50;
       const isNew = isNewItem(item);
       const hasUpdate = item.hasUpdate === true;
+      const hasLink = !!item.detailUrl;
 
       return `
-        <div class="project-dot ${hasUpdate ? 'has-update' : ''}" data-id="${item.id}"
+        <div class="project-dot ${hasUpdate ? 'has-update' : ''} ${hasLink ? 'has-link' : ''}" data-id="${item.id}"
              style="left: ${x}%; top: ${y}%;">
           <div class="dot-inner ${relativeStatus.toLowerCase()}">
             ${isNew ? '<span class="dot-new">NEW</span>' : ''}
             ${hasUpdate ? '<span class="dot-update">🔔</span>' : ''}
+            ${hasLink ? '<span class="dot-link">🔗</span>' : ''}
             <span class="dot-emoji">${config.emoji}</span>
             <span class="dot-name">${escapeHtml(shortName)}</span>
             <span class="dot-score">重${importance} / 緊${urgency}</span>
@@ -2591,20 +2610,22 @@
       const config = STATUS_CONFIG[relativeStatus];
       const pos = positions.get(item.id) || getScorePosition(item, bounds);
       const { x, y } = pos;
-      const shortName = item.shortName || item.title.slice(0, 6);
+      const shortName = item.title.slice(0, 6);
       const urgency = item.urgencyScore ?? 50;
       const importance = item.importanceScore ?? 50;
       const isNew = isNewItem(item);
       const hasUpdate = item.hasUpdate === true;
+      const hasLink = !!item.detailUrl;
       const layerClass = item.layer === 'self' ? 'self-item' : 'other-item';
       const layerLabel = item.layer === 'self' ? '自分' : '座';
 
       return `
-        <div class="project-dot ${layerClass} ${hasUpdate ? 'has-update' : ''}" data-id="${item.id}"
+        <div class="project-dot ${layerClass} ${hasUpdate ? 'has-update' : ''} ${hasLink ? 'has-link' : ''}" data-id="${item.id}"
              style="left: ${x}%; top: ${y}%;">
           <div class="dot-inner ${relativeStatus.toLowerCase()}">
             ${isNew ? '<span class="dot-new">NEW</span>' : ''}
             ${hasUpdate ? '<span class="dot-update">🔔</span>' : ''}
+            ${hasLink ? '<span class="dot-link">🔗</span>' : ''}
             <span class="dot-emoji">${config.emoji}</span>
             <span class="dot-name">${escapeHtml(shortName)}</span>
             <span class="dot-score">重${importance} / 緊${urgency}</span>
@@ -2705,7 +2726,14 @@
           e.stopPropagation();
           const id = dot.dataset.id;
           const item = items.find(i => i.id === id);
-          if (item) openEditModal(item);
+          if (item) {
+            // If detailUrl exists, open it in new tab
+            if (item.detailUrl) {
+              window.open(item.detailUrl, '_blank');
+            } else {
+              openEditModal(item);
+            }
+          }
         });
       });
 
@@ -2846,7 +2874,13 @@
         card.addEventListener('click', () => {
           const id = card.dataset.id;
           const item = items.find(i => i.id === id);
-          if (item) openEditModal(item);
+          if (item) {
+            if (item.detailUrl) {
+              window.open(item.detailUrl, '_blank');
+            } else {
+              openEditModal(item);
+            }
+          }
         });
       });
     }
@@ -2865,7 +2899,7 @@
 
     function resetForm() {
       document.getElementById('inputTitle').value = '';
-      document.getElementById('inputShortName').value = '';
+      document.getElementById('inputDetailUrl').value = '';
       document.getElementById('inputPerson').value = '';
       document.getElementById('inputMemo').value = '';
       document.getElementById('inputImportance').value = 50;
@@ -2892,13 +2926,12 @@
 
       // Show item meta information
       document.getElementById('itemMeta').style.display = 'flex';
-      document.getElementById('metaId').textContent = item.id;
       const createdAt = item.createdAt || '-';
       const updatedAt = item.updatedAt || '-';
       document.getElementById('metaDates').textContent = `作成: ${createdAt} / 更新: ${updatedAt}`;
 
       document.getElementById('inputTitle').value = item.title;
-      document.getElementById('inputShortName').value = item.shortName || '';
+      document.getElementById('inputDetailUrl').value = item.detailUrl || '';
       document.getElementById('inputPerson').value = item.person || '';
       document.getElementById('inputMemo').value = item.memo || '';
       const importance = item.importanceScore ?? 50;
@@ -2917,11 +2950,11 @@
       const activeStatus = document.querySelector('#statusGroup .status-btn.active');
       return {
         title: document.getElementById('inputTitle').value.trim(),
-        shortName: document.getElementById('inputShortName').value.trim(),
         layer: activeLayer ? activeLayer.dataset.layer : 'self',
         status: activeStatus ? activeStatus.dataset.status : 'FIRE',
         importanceScore: parseInt(document.getElementById('inputImportance').value, 10),
         urgencyScore: parseInt(document.getElementById('inputUrgency').value, 10),
+        detailUrl: document.getElementById('inputDetailUrl').value.trim(),
         person: document.getElementById('inputPerson').value.trim(),
         memo: document.getElementById('inputMemo').value.trim()
       };
@@ -3073,8 +3106,8 @@
         const lower = header.toLowerCase();
         if (lower === 'id') headerMap.id = i;
         else if (lower === 'title' || header.includes('タイトル') || header.includes('プロジェクト名') || header.includes('名前')) headerMap.title = i;
-        else if (lower === 'shortname' || lower === 'short' || header.includes('ショート') || header.includes('略称')) headerMap.shortName = i;
         else if (lower === 'layer' || header.includes('レイヤー') || header.includes('自分フラグ') || header.includes('自分') || header.includes('マトリ')) headerMap.layer = i;
+        else if (lower === 'detailurl' || lower === 'detail url' || lower === 'url' || lower === 'link' || header.includes('詳細リンク') || header.includes('リンク') || header.includes('URL')) headerMap.detailUrl = i;
         else if (lower === 'status' || header.includes('ステータス')) headerMap.status = i;
         else if (header.includes('重要') || lower === 'importance' || lower === 'importancescore') headerMap.importance = i;
         else if (header.includes('緊急') || lower === 'urgency' || lower === 'urgencyscore') headerMap.urgency = i;
@@ -3152,11 +3185,11 @@
         newItems.push({
           id: id,
           title: title,
-          shortName: (headerMap.shortName !== undefined && values[headerMap.shortName]) ? values[headerMap.shortName].trim() : '',
           layer: layer,
           status: validStatus,
           importanceScore: Math.max(0, Math.min(100, importance)),
           urgencyScore: Math.max(0, Math.min(100, urgency)),
+          detailUrl: (headerMap.detailUrl !== undefined && values[headerMap.detailUrl]) ? values[headerMap.detailUrl].trim() : '',
           person: (headerMap.person !== undefined && values[headerMap.person]) ? values[headerMap.person].trim() : '',
           memo: (headerMap.memo !== undefined && values[headerMap.memo]) ? values[headerMap.memo].trim() : '',
           category: (headerMap.category !== undefined && values[headerMap.category]) ? values[headerMap.category].trim() : '',
