@@ -751,7 +751,7 @@
     /* Matrix Containers Wrapper */
     .matrix-containers-wrapper {
       position: relative;
-      min-height: 300px;
+      min-height: 320px;
     }
 
     /* === All Matrix Container (統合ビュー) === */
@@ -769,6 +769,8 @@
       box-shadow: 0 8px 32px rgba(91, 143, 255, 0.15), 0 8px 32px rgba(212, 168, 85, 0.15);
       border-radius: 14px;
       padding: 14px;
+      height: 280px;
+      box-sizing: border-box;
     }
 
     .matrix-all .layer-title {
@@ -806,7 +808,7 @@
     /* Matrix Scene - contains 2 layers */
     .matrix-scene {
       position: relative;
-      height: 260px;
+      height: 320px;
       transform-style: preserve-3d;
       transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -817,6 +819,8 @@
       border-radius: 14px;
       transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
+      height: 280px;
+      box-sizing: border-box;
     }
 
     .matrix-layers .matrix-layer {
@@ -841,12 +845,12 @@
 
     /* ===== Focus: Self - 自分Matrixが前面に ===== */
     .matrix-scene[data-focus="self"] .matrix-layer.self {
-      transform: translateZ(50px) translateY(15px);
+      transform: translateZ(50px) translateY(0);
       opacity: 1;
       z-index: 10;
     }
     .matrix-scene[data-focus="self"] .matrix-layer.other {
-      transform: translateZ(-30px) translateY(-5px) scale(0.9);
+      transform: translateZ(-30px) translateY(-20px) scale(0.9);
       opacity: 0.3;
       z-index: 1;
       filter: blur(1px) saturate(0.6);
@@ -854,13 +858,13 @@
 
     /* ===== Focus: Other - 座Matrixが前面に ===== */
     .matrix-scene[data-focus="other"] .matrix-layer.self {
-      transform: translateZ(-30px) translateY(-5px) scale(0.9);
+      transform: translateZ(-30px) translateY(-20px) scale(0.9);
       opacity: 0.3;
       z-index: 1;
       filter: blur(1px) saturate(0.6);
     }
     .matrix-scene[data-focus="other"] .matrix-layer.other {
-      transform: translateZ(50px) translateY(15px);
+      transform: translateZ(50px) translateY(0);
       opacity: 1;
       z-index: 10;
     }
@@ -1832,6 +1836,7 @@
 
       .matrix-layer {
         padding: 24px;
+        height: 400px;
       }
 
       .matrix-grid {
@@ -1895,6 +1900,10 @@
 
       .matrix-scene {
         height: 550px;
+      }
+
+      .matrix-layer {
+        height: 500px;
       }
 
       .matrix-grid {
@@ -2600,6 +2609,8 @@
         if (showUpdatedOnly) showNewOnly = false;
       } else if (filterType === 'person') {
         selectedPerson = selectedPerson === value ? '' : value;
+      } else if (filterType === 'category') {
+        currentCategory = currentCategory === value ? '' : value;
       }
       updateFilterSheetState();
       updateActiveFilterChips();
@@ -2610,6 +2621,7 @@
       if (filterType === 'new') showNewOnly = false;
       else if (filterType === 'update') showUpdatedOnly = false;
       else if (filterType === 'person') selectedPerson = '';
+      else if (filterType === 'category') currentCategory = '';
       updateFilterSheetState();
       updateActiveFilterChips();
       renderMatrix();
@@ -2619,6 +2631,7 @@
       showNewOnly = false;
       showUpdatedOnly = false;
       selectedPerson = '';
+      currentCategory = '';
       updateFilterSheetState();
       updateActiveFilterChips();
       renderMatrix();
@@ -2630,6 +2643,11 @@
         const filter = opt.dataset.filter;
         if (filter === 'new') opt.classList.toggle('selected', showNewOnly);
         else if (filter === 'update') opt.classList.toggle('selected', showUpdatedOnly);
+      });
+
+      // Update category options
+      document.querySelectorAll('#categoryOptions .filter-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.category === currentCategory);
       });
 
       // Update person options
@@ -3906,6 +3924,13 @@
               <span>相談</span>
               <span class="option-count" id="updateCount">(0)</span>
             </button>
+          </div>
+        </div>
+        <!-- Category Filter -->
+        <div class="filter-section">
+          <div class="filter-section-title">カテゴリー</div>
+          <div class="filter-options" id="categoryOptions">
+            <!-- Category options will be dynamically generated -->
           </div>
         </div>
         <!-- Person Filter -->
