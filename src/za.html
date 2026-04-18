@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>座と興 - 見えないものを設計する</title>
+  <style>
+    :root {
+      --bg: #f5f5f0;
+      --text: #1a1a1a;
+      --text-muted: #666;
+      --accent: #e85a30;
+      --border: #ddd;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(245, 245, 240, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .nav-back {
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .nav-back:hover {
+      text-decoration: underline;
+    }
+
+    /* Slides Container */
+    .slides-container {
+      padding-top: 60px;
+    }
+
+    .slide {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .slide:last-child {
+      border-bottom: none;
+    }
+
+    .slide-content {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .slide img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Slide Navigation Dots */
+    .slide-nav {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 50;
+    }
+
+    .slide-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .slide-dot:hover,
+    .slide-dot.active {
+      background: var(--accent);
+      transform: scale(1.2);
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      height: 3px;
+      background: var(--accent);
+      z-index: 99;
+      transition: width 0.1s;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .slide {
+        min-height: auto;
+        padding: 20px 16px;
+      }
+
+      .slide-nav {
+        display: none;
+      }
+    }
+
+    /* Keyboard hint */
+    .keyboard-hint {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .keyboard-hint.visible {
+      opacity: 1;
+    }
+
+    .keyboard-hint kbd {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin: 0 2px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="nav-back">HEAD-MAP</a>
+    <span class="nav-title">座と興 - 見えないものを設計する</span>
+  </nav>
+
+  <div class="progress-bar" id="progressBar"></div>
+
+  <div class="slide-nav" id="slideNav"></div>
+
+  <div class="slides-container" id="slidesContainer">
+    <section class="slide" data-slide="1">
+      <div class="slide-content">
+        <img src="za-images/image1.png" alt="見えないものを設計する - 効率化の限界を突破する、日本的「創発」のオペレーティング・システム">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="2">
+      <div class="slide-content">
+        <img src="za-images/image2.png" alt="「最適化」の限界と、「あいだ」の可能性">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="3">
+      <div class="slide-content">
+        <img src="za-images/image3.png" alt="間（MA）：余白という「能動的構造」">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="4">
+      <div class="slide-content">
+        <img src="za-images/image4.png" alt="座（ZA）：空洞を囲む「関係性の器」">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="5">
+      <div class="slide-content">
+        <img src="za-images/image5.png" alt="型（KATA）：「間」を継承する動的フォーマット - 守破離">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="6">
+      <div class="slide-content">
+        <img src="za-images/image6.png" alt="興（KYO）：場から立ち上がる「創発」">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="7">
+      <div class="slide-content">
+        <img src="za-images/image7.png" alt="日本的創発のダイナミズム：四概念の循環構造">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="8">
+      <div class="slide-content">
+        <img src="za-images/image8.png" alt="創発を支える「場の思想」">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="9">
+      <div class="slide-content">
+        <img src="za-images/image9.png" alt="空間の実装：見えないものを建てる">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="10">
+      <div class="slide-content">
+        <img src="za-images/image10.png" alt="価値創造のパラダイム・シフト - 西洋と日本">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="11">
+      <div class="slide-content">
+        <img src="za-images/image11.png" alt="現代組織への実装：マネジメントの再定義">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="12">
+      <div class="slide-content">
+        <img src="za-images/image12.png" alt="実践プロトコルI：ミーティング（微視的相互作用）">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="13">
+      <div class="slide-content">
+        <img src="za-images/image13.png" alt="実践プロトコルII：プロジェクト（巨視的価値創造）">
+      </div>
+    </section>
+
+    <section class="slide" data-slide="14">
+      <div class="slide-content">
+        <img src="za-images/image14.png" alt="創発の条件">
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <p>HEAD-MAP: 座と興のマネジメントシステム</p>
+    <p><a href="index.html">HEAD-MAPに戻る</a></p>
+  </footer>
+
+  <div class="keyboard-hint" id="keyboardHint">
+    <kbd>↑</kbd><kbd>↓</kbd> でスライド移動 <kbd>Home</kbd> 最初へ <kbd>End</kbd> 最後へ
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const slideNav = document.getElementById('slideNav');
+    const progressBar = document.getElementById('progressBar');
+    const keyboardHint = document.getElementById('keyboardHint');
+    let currentSlide = 0;
+
+    // Create navigation dots
+    slides.forEach((slide, index) => {
+      const dot = document.createElement('div');
+      dot.className = 'slide-dot';
+      dot.dataset.slide = index;
+      dot.addEventListener('click', () => scrollToSlide(index));
+      slideNav.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll('.slide-dot');
+
+    function scrollToSlide(index) {
+      slides[index].scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function updateActiveSlide() {
+      const scrollPos = window.scrollY + window.innerHeight / 2;
+
+      slides.forEach((slide, index) => {
+        const slideTop = slide.offsetTop;
+        const slideBottom = slideTop + slide.offsetHeight;
+
+        if (scrollPos >= slideTop && scrollPos < slideBottom) {
+          currentSlide = index;
+          dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === index);
+          });
+        }
+      });
+
+      // Update progress bar
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (window.scrollY / scrollHeight) * 100;
+      progressBar.style.width = progress + '%';
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault();
+        if (currentSlide < slides.length - 1) {
+          scrollToSlide(currentSlide + 1);
+        }
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        if (currentSlide > 0) {
+          scrollToSlide(currentSlide - 1);
+        }
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        scrollToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        scrollToSlide(slides.length - 1);
+      }
+    });
+
+    // Show keyboard hint on first visit
+    let hintTimeout;
+    function showKeyboardHint() {
+      keyboardHint.classList.add('visible');
+      clearTimeout(hintTimeout);
+      hintTimeout = setTimeout(() => {
+        keyboardHint.classList.remove('visible');
+      }, 3000);
+    }
+
+    // Initialize
+    window.addEventListener('scroll', updateActiveSlide);
+    updateActiveSlide();
+
+    // Show hint after 1 second
+    setTimeout(showKeyboardHint, 1000);
+  </script>
+</body>
+</html>
