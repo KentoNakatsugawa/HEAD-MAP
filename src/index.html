@@ -546,14 +546,16 @@
       box-shadow: 0 0 8px rgba(140, 130, 170, 0.5);
     }
 
-    /* All Matrix: Self items have blue outer ring */
+    /* All Matrix: Self items have blue border */
     .all-matrix .project-dot.self-item .dot-inner {
-      box-shadow: 0 0 0 2px var(--self-color), 0 0 12px rgba(91, 143, 255, 0.4);
+      border-color: var(--self-color);
+      box-shadow: 0 0 6px rgba(91, 143, 255, 0.4);
     }
 
-    /* All Matrix: Other items have gold outer ring */
+    /* All Matrix: Other items have gold border */
     .all-matrix .project-dot.other-item .dot-inner {
-      box-shadow: 0 0 0 2px var(--other-color), 0 0 12px rgba(212, 168, 85, 0.4);
+      border-color: var(--other-color);
+      box-shadow: 0 0 6px rgba(212, 168, 85, 0.4);
     }
 
     /* === Layer Matrix Container (個別ビュー) === */
@@ -851,179 +853,80 @@
       z-index: 100;
     }
 
-    /* Activity Ring Container */
     .dot-inner {
-      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
+      padding: 4px 6px;
+      border-radius: 6px;
       background: var(--bg-card);
+      border: 2px solid;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      min-width: 24px;
+      min-height: 24px;
     }
 
-    /* Activity Rings SVG */
-    .activity-rings {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      transform: rotate(-90deg);
+    .matrix-layer.self .dot-inner { border-color: var(--self-color); }
+    .matrix-layer.other .dot-inner {
+      border-color: var(--other-color);
+      background: rgba(10, 15, 25, 0.85);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
 
-    .ring-track {
-      fill: none;
-      stroke: rgba(255, 255, 255, 0.1);
-    }
-
-    .ring-progress {
-      fill: none;
-      stroke-linecap: round;
-      transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .ring-importance {
-      stroke: var(--fire);
-    }
-
-    .ring-urgency {
-      stroke: var(--quick);
-    }
-
-    /* Center content */
-    .dot-center {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Status indicator glow */
-    .dot-inner::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      opacity: 0.3;
-      transition: all 0.3s;
-    }
-
-    .dot-inner.fire::before { background: var(--fire); box-shadow: 0 0 12px var(--fire); }
-    .dot-inner.design::before { background: var(--design); box-shadow: 0 0 12px var(--design); }
-    .dot-inner.quick::before { background: var(--quick); box-shadow: 0 0 12px var(--quick); }
-    .dot-inner.epoche::before { background: var(--epoche); box-shadow: 0 0 8px var(--epoche); }
-    .dot-inner.watch::before { background: var(--watch); box-shadow: 0 0 12px var(--watch); }
-    .dot-inner.monitor::before { background: var(--monitor); box-shadow: 0 0 8px var(--monitor); }
-    .dot-inner.delegate::before { background: var(--delegate); box-shadow: 0 0 8px var(--delegate); }
-    .dot-inner.seed::before { background: var(--seed); box-shadow: 0 0 6px var(--seed); opacity: 0.2; }
-
-    .matrix-layer.self .dot-inner { box-shadow: 0 0 0 2px var(--self-color); }
-    .matrix-layer.other .dot-inner { box-shadow: 0 0 0 2px var(--other-color); }
+    .dot-inner.fire { border-color: var(--fire); background: rgba(255, 107, 107, 0.15); }
+    .dot-inner.design { border-color: var(--design); background: rgba(138, 173, 255, 0.15); }
+    .dot-inner.quick { border-color: var(--quick); background: rgba(128, 232, 128, 0.15); }
+    .dot-inner.epoche { border-color: var(--epoche); background: rgba(170, 170, 204, 0.15); }
+    .dot-inner.watch { border-color: var(--watch); background: rgba(255, 184, 112, 0.15); }
+    .dot-inner.monitor { border-color: var(--monitor); background: rgba(112, 176, 255, 0.15); }
+    .dot-inner.delegate { border-color: var(--delegate); background: rgba(128, 232, 184, 0.15); }
+    .dot-inner.seed { border-color: var(--seed); background: rgba(136, 136, 136, 0.15); }
 
     .dot-emoji {
-      font-size: 0.9rem;
+      font-size: 0.75rem;
       line-height: 1;
-      position: relative;
-      z-index: 2;
     }
 
     .dot-name {
       font-size: 0.5rem;
       font-weight: 600;
       color: var(--text);
-      max-width: 40px;
+      max-width: 60px;
       overflow: hidden;
       text-overflow: ellipsis;
-      line-height: 1.1;
-      margin-top: 2px;
-      text-align: center;
-      position: relative;
-      z-index: 2;
+      line-height: 1.2;
+      margin-top: 1px;
     }
 
     /* Hover expanded state */
     .project-dot:hover .dot-inner {
-      width: 80px;
-      height: 80px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-    }
-
-    .project-dot:hover .dot-inner::before {
-      width: 30px;
-      height: 30px;
-      opacity: 0.4;
+      padding: 8px 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transform: scale(1.3);
     }
 
     .project-dot:hover .dot-emoji {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
     }
 
     .project-dot:hover .dot-name {
-      font-size: 0.7rem;
-      max-width: 70px;
+      font-size: 0.75rem;
+      max-width: 100px;
     }
 
     .dot-details {
       display: none;
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-top: 8px;
-      padding: 8px;
-      background: var(--bg-modal);
-      border-radius: 8px;
-      border: 1px solid var(--border);
+      margin-top: 4px;
       font-size: 0.625rem;
       color: var(--text-muted);
       text-align: center;
-      max-width: 140px;
-      white-space: nowrap;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      z-index: 10;
+      max-width: 120px;
     }
 
     .project-dot:hover .dot-details {
       display: block;
-    }
-
-    .dot-score {
-      display: block;
-      font-size: 0.6rem;
-      color: var(--text);
-      margin-bottom: 4px;
-      font-weight: 600;
-    }
-
-    /* Dimmed state for non-target items in layer views */
-    .project-dot.dimmed {
-      opacity: 0.35;
-      filter: saturate(0.4) brightness(0.7);
-    }
-
-    .project-dot.dimmed .dot-inner {
-      transform: scale(0.75);
-    }
-
-    .project-dot.dimmed:hover {
-      opacity: 0.8;
-      filter: saturate(0.7) brightness(0.9);
-    }
-
-    .project-dot.dimmed:hover .dot-inner {
-      transform: scale(0.9);
-      width: 60px;
-      height: 60px;
     }
 
     .dot-category {
@@ -2683,36 +2586,6 @@
     }
 
     // Render dot for All Matrix (shows layer distinction)
-    // Generate activity ring SVG
-    function renderActivityRings(importance, urgency) {
-      const outerRadius = 23;
-      const innerRadius = 17;
-      const strokeWidth = 4;
-      const outerCircumference = 2 * Math.PI * outerRadius;
-      const innerCircumference = 2 * Math.PI * innerRadius;
-
-      // Calculate dash offsets (higher score = more filled)
-      const importanceOffset = outerCircumference * (1 - importance / 100);
-      const urgencyOffset = innerCircumference * (1 - urgency / 100);
-
-      return `
-        <svg class="activity-rings" viewBox="0 0 52 52">
-          <!-- Outer ring (Importance) -->
-          <circle class="ring-track" cx="26" cy="26" r="${outerRadius}" stroke-width="${strokeWidth}" />
-          <circle class="ring-progress ring-importance" cx="26" cy="26" r="${outerRadius}"
-                  stroke-width="${strokeWidth}"
-                  stroke-dasharray="${outerCircumference}"
-                  stroke-dashoffset="${importanceOffset}" />
-          <!-- Inner ring (Urgency) -->
-          <circle class="ring-track" cx="26" cy="26" r="${innerRadius}" stroke-width="${strokeWidth}" />
-          <circle class="ring-progress ring-urgency" cx="26" cy="26" r="${innerRadius}"
-                  stroke-width="${strokeWidth}"
-                  stroke-dasharray="${innerCircumference}"
-                  stroke-dashoffset="${urgencyOffset}" />
-        </svg>
-      `;
-    }
-
     function renderAllMatrixDot(item, bounds, positions) {
       const relativeStatus = getRelativeStatus(item, bounds);
       const config = STATUS_CONFIG[relativeStatus];
@@ -2730,16 +2603,13 @@
         <div class="project-dot ${layerClass} ${hasUpdate ? 'has-update' : ''}" data-id="${item.id}"
              style="left: ${x}%; top: ${y}%;">
           <div class="dot-inner ${relativeStatus.toLowerCase()}">
-            ${renderActivityRings(importance, urgency)}
-            <div class="dot-center">
-              ${isNew ? '<span class="dot-new">NEW</span>' : ''}
-              ${hasUpdate ? '<span class="dot-update">🔔</span>' : ''}
-              <span class="dot-emoji">${config.emoji}</span>
-              <span class="dot-name">${escapeHtml(shortName)}</span>
-            </div>
+            ${isNew ? '<span class="dot-new">NEW</span>' : ''}
+            ${hasUpdate ? '<span class="dot-update">🔔</span>' : ''}
+            <span class="dot-emoji">${config.emoji}</span>
+            <span class="dot-name">${escapeHtml(shortName)}</span>
+            <span class="dot-score">重${importance} / 緊${urgency}</span>
             <div class="dot-details">
               <span class="dot-layer-badge">${layerLabel}</span>
-              <span class="dot-score">重${importance} / 緊${urgency}</span>
               ${item.category ? `<span class="dot-category">${escapeHtml(item.category)}</span>` : ''}
               ${item.person ? `👤 ${escapeHtml(item.person)}` : ''}
               ${item.updateDetail ? `<div class="dot-update-detail">💬 ${escapeHtml(item.updateDetail)}</div>` : ''}
@@ -2767,17 +2637,22 @@
         filteredItems = filteredItems.filter(i => i.hasUpdate);
       }
 
-      // UNIFIED BOUNDS: Use same scale for all views so positions don't change
-      const unifiedBounds = calculateScaleBounds(filteredItems);
-      selfBounds = unifiedBounds;
-      otherBounds = unifiedBounds;
+      // Get items for each layer
+      const selfItems = filteredItems.filter(i => i.layer === 'self');
+      const otherItems = filteredItems.filter(i => i.layer === 'other');
+
+      // Calculate auto-scaling bounds
+      selfBounds = calculateScaleBounds(selfItems);
+      otherBounds = calculateScaleBounds(otherItems);
+      const allBounds = calculateScaleBounds(filteredItems);
 
       // Helper to render quadrant dividers at median position
-      function renderQuadrantDividers(bounds) {
+      function renderQuadrantDividers(bounds, layerClass) {
         const { minU, maxU, minI, maxI, midU, midI } = bounds;
         const rangeU = maxU - minU || 1;
         const rangeI = maxI - minI || 1;
 
+        // Calculate median positions as percentages
         const midXPercent = ((midU - minU) / rangeU) * 100;
         const midYPercent = 100 - ((midI - minI) / rangeI) * 100;
 
@@ -2787,41 +2662,38 @@
         `;
       }
 
-      // Calculate positions with UNIFIED bounds for all items
-      const unifiedPositions = calculatePositionsWithOffset(filteredItems, unifiedBounds);
+      // Calculate positions with offset for overlapping items
+      const selfPositions = calculatePositionsWithOffset(selfItems, selfBounds);
+      const otherPositions = calculatePositionsWithOffset(otherItems, otherBounds);
+      const allPositions = calculatePositionsWithOffset(filteredItems, allBounds);
 
       // Preserve quadrant labels
       const allLabels = allPlot.querySelector('.quadrant-labels').outerHTML;
       const selfLabels = selfPlot.querySelector('.quadrant-labels').outerHTML;
       const otherLabels = otherPlot.querySelector('.quadrant-labels').outerHTML;
 
-      const dividers = renderQuadrantDividers(unifiedBounds);
-
       // Render All Matrix (統合ビュー - 全プロジェクト)
       if (filteredItems.length > 0) {
-        const dots = filteredItems.map(i => renderAllMatrixDot(i, unifiedBounds, unifiedPositions)).join('');
+        const dividers = renderQuadrantDividers(allBounds, 'all');
+        const dots = filteredItems.map(i => renderAllMatrixDot(i, allBounds, allPositions)).join('');
         allPlot.innerHTML = allLabels + dividers + dots;
       } else {
         allPlot.innerHTML = allLabels + '<div class="plot-empty">アイテムなし</div>';
       }
 
-      // Render Self Matrix - ALL items but highlight self, dim others
-      if (filteredItems.length > 0) {
-        const dots = filteredItems.map(i => {
-          const isTarget = i.layer === 'self';
-          return renderLayerDot(i, unifiedBounds, unifiedPositions, isTarget, 'self');
-        }).join('');
+      // Render self layer dots with dividers
+      if (selfItems.length > 0) {
+        const dividers = renderQuadrantDividers(selfBounds, 'self');
+        const dots = selfItems.map(i => renderProjectDot(i, selfBounds, selfPositions)).join('');
         selfPlot.innerHTML = selfLabels + dividers + dots;
       } else {
         selfPlot.innerHTML = selfLabels + '<div class="plot-empty">アイテムなし</div>';
       }
 
-      // Render Other Matrix - ALL items but highlight other, dim self
-      if (filteredItems.length > 0) {
-        const dots = filteredItems.map(i => {
-          const isTarget = i.layer === 'other';
-          return renderLayerDot(i, unifiedBounds, unifiedPositions, isTarget, 'other');
-        }).join('');
+      // Render other layer dots with dividers
+      if (otherItems.length > 0) {
+        const dividers = renderQuadrantDividers(otherBounds, 'other');
+        const dots = otherItems.map(i => renderProjectDot(i, otherBounds, otherPositions)).join('');
         otherPlot.innerHTML = otherLabels + dividers + dots;
       } else {
         otherPlot.innerHTML = otherLabels + '<div class="plot-empty">アイテムなし</div>';
@@ -2845,42 +2717,6 @@
           setLayerFocus(targetLayer);
         });
       });
-    }
-
-    // Render dot for Self/Other layer views (shows all items, highlights target layer)
-    function renderLayerDot(item, bounds, positions, isTarget, viewLayer) {
-      const relativeStatus = getRelativeStatus(item, bounds);
-      const config = STATUS_CONFIG[relativeStatus];
-      const pos = positions.get(item.id) || getScorePosition(item, bounds);
-      const { x, y } = pos;
-      const shortName = item.shortName || item.title.slice(0, 6);
-      const urgency = item.urgencyScore ?? 50;
-      const importance = item.importanceScore ?? 50;
-      const isNew = isNewItem(item);
-      const hasUpdate = item.hasUpdate === true;
-      const dimClass = isTarget ? '' : 'dimmed';
-      const layerClass = item.layer === 'self' ? 'self-item' : 'other-item';
-
-      return `
-        <div class="project-dot ${layerClass} ${dimClass} ${hasUpdate && isTarget ? 'has-update' : ''}" data-id="${item.id}"
-             style="left: ${x}%; top: ${y}%;">
-          <div class="dot-inner ${relativeStatus.toLowerCase()}">
-            ${renderActivityRings(importance, urgency)}
-            <div class="dot-center">
-              ${isNew && isTarget ? '<span class="dot-new">NEW</span>' : ''}
-              ${hasUpdate && isTarget ? '<span class="dot-update">🔔</span>' : ''}
-              <span class="dot-emoji">${config.emoji}</span>
-              <span class="dot-name">${escapeHtml(shortName)}</span>
-            </div>
-            <div class="dot-details">
-              <span class="dot-score">重${importance} / 緊${urgency}</span>
-              ${item.category ? `<span class="dot-category">${escapeHtml(item.category)}</span>` : ''}
-              ${item.person ? `👤 ${escapeHtml(item.person)}` : ''}
-              ${item.updateDetail ? `<div class="dot-update-detail">💬 ${escapeHtml(item.updateDetail)}</div>` : ''}
-            </div>
-          </div>
-        </div>
-      `;
     }
 
     function renderCard(item, bounds) {
