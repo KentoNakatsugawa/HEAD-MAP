@@ -1985,42 +1985,6 @@
     </div>
   </div>
 
-  <!-- Filter Bottom Sheet -->
-  <div class="filter-sheet-overlay" id="filterSheetOverlay">
-    <div class="filter-sheet" id="filterSheet">
-      <div class="filter-sheet-handle"></div>
-      <div class="filter-sheet-header">
-        <span class="filter-sheet-title">フィルター</span>
-        <button class="filter-sheet-close" id="filterSheetClose">×</button>
-      </div>
-      <div class="filter-sheet-body">
-        <!-- Flag Filters -->
-        <div class="filter-section">
-          <div class="filter-section-title">フラグ</div>
-          <div class="filter-options" id="flagOptions">
-            <button class="filter-option" data-filter="new">
-              <span class="option-icon">🆕</span>
-              <span>NEW</span>
-              <span class="option-count" id="newCount">(0)</span>
-            </button>
-            <button class="filter-option" data-filter="update">
-              <span class="option-icon">🔔</span>
-              <span>相談</span>
-              <span class="option-count" id="updateCount">(0)</span>
-            </button>
-          </div>
-        </div>
-        <!-- Person Filter -->
-        <div class="filter-section">
-          <div class="filter-section-title">移譲先</div>
-          <div class="filter-options" id="personOptions">
-            <!-- Person options will be dynamically generated -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Matrix Containers Wrapper -->
   <div class="matrix-containers-wrapper" id="matrixWrapper">
 
@@ -3913,5 +3877,41 @@
       loadData();
     });
   </script>
+
+  <!-- Filter Bottom Sheet (must be outside main-content for z-index) -->
+  <div class="filter-sheet-overlay" id="filterSheetOverlay">
+    <div class="filter-sheet" id="filterSheet">
+      <div class="filter-sheet-handle"></div>
+      <div class="filter-sheet-header">
+        <span class="filter-sheet-title">フィルター</span>
+        <button class="filter-sheet-close" id="filterSheetClose">×</button>
+      </div>
+      <div class="filter-sheet-body">
+        <!-- Flag Filters -->
+        <div class="filter-section">
+          <div class="filter-section-title">フラグ</div>
+          <div class="filter-options" id="flagOptions">
+            <button class="filter-option" data-filter="new">
+              <span class="option-icon">🆕</span>
+              <span>NEW</span>
+              <span class="option-count" id="newCount">(0)</span>
+            </button>
+            <button class="filter-option" data-filter="update">
+              <span class="option-icon">🔔</span>
+              <span>相談</span>
+              <span class="option-count" id="updateCount">(0)</span>
+            </button>
+          </div>
+        </div>
+        <!-- Person Filter -->
+        <div class="filter-section">
+          <div class="filter-section-title">移譲先</div>
+          <div class="filter-options" id="personOptions">
+            <!-- Person options will be dynamically generated -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
