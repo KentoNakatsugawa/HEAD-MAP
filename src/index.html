@@ -865,6 +865,7 @@
     /* === All Matrix Container (統合ビュー) === */
     .matrix-all {
       transition: opacity 0.5s ease, transform 0.5s ease;
+      height: 320px;
     }
 
     .matrix-all.hidden {
@@ -877,7 +878,7 @@
       box-shadow: 0 8px 32px rgba(91, 143, 255, 0.15), 0 8px 32px rgba(212, 168, 85, 0.15);
       border-radius: 14px;
       padding: 14px;
-      height: 280px;
+      height: 100%;
       box-sizing: border-box;
     }
 
@@ -1958,14 +1959,14 @@
         min-height: 520px;
       }
 
-      .matrix-scene {
+      .matrix-scene,
+      .matrix-all {
         height: 450px;
       }
 
       .matrix-layer,
       .matrix-all .matrix-layer.all-matrix {
         padding: 24px;
-        height: 400px;
       }
 
       .matrix-grid {
@@ -2027,13 +2028,9 @@
         padding: 32px;
       }
 
-      .matrix-scene {
+      .matrix-scene,
+      .matrix-all {
         height: 550px;
-      }
-
-      .matrix-layer,
-      .matrix-all .matrix-layer.all-matrix {
-        height: 500px;
       }
 
       .matrix-grid {
