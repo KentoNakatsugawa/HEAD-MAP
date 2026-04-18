@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&display=swap" rel="stylesheet">
-  <title>FPM - Fintech Project Map</title>
+  <title>FHM - Fintech Headmap</title>
   <style>
     :root {
       --bg: #080b14;
@@ -134,20 +134,25 @@
 
     .icon-btn:hover { border-color: var(--self-color); background: var(--bg-modal); }
 
-    /* Layer Toggle Tabs */
+    /* Layer Toggle Wrapper with Indicator */
+    .layer-toggle-wrapper {
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 12px 16px 0;
+    }
+
     .layer-toggle {
       display: flex;
       gap: 0;
-      padding: 12px 16px;
-      max-width: 600px;
-      margin: 0 auto;
+      position: relative;
     }
 
     .layer-toggle-btn {
       flex: 1;
-      padding: 12px 16px;
-      border: 1px solid var(--border);
-      background: var(--bg-card);
+      padding: 14px 16px;
+      border: none;
+      background: transparent;
       color: var(--text-muted);
       font-size: 0.875rem;
       font-weight: 600;
@@ -157,10 +162,12 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      position: relative;
     }
 
-    .layer-toggle-btn:first-child { border-radius: 10px 0 0 10px; }
-    .layer-toggle-btn:last-child { border-radius: 0 10px 10px 0; border-left: none; }
+    .layer-toggle-btn:hover {
+      color: var(--text);
+    }
 
     .layer-toggle-btn .dot {
       width: 8px; height: 8px;
@@ -176,25 +183,32 @@
 
     .layer-toggle-btn.active {
       color: var(--text);
-      border-color: transparent;
     }
 
-    .layer-toggle-btn[data-layer="self"].active {
-      background: linear-gradient(135deg, rgba(91, 143, 255, 0.2) 0%, rgba(91, 143, 255, 0.05) 100%);
-      border-color: var(--self-color);
+    /* Sliding Indicator */
+    .layer-indicator {
+      position: absolute;
+      bottom: 0;
+      height: 3px;
+      border-radius: 3px 3px 0 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
     }
 
-    .layer-toggle-btn[data-layer="other"].active {
-      background: linear-gradient(135deg, rgba(212, 168, 85, 0.2) 0%, rgba(212, 168, 85, 0.05) 100%);
-      border-color: var(--other-color);
+    .layer-indicator[data-layer="self"] {
+      background: var(--self-color);
+      box-shadow: 0 0 12px var(--self-color);
     }
 
-    .layer-toggle-btn[data-layer="all"].active {
-      background: linear-gradient(135deg, rgba(91, 143, 255, 0.15) 0%, rgba(212, 168, 85, 0.15) 100%);
-      border-color: var(--accent);
+    .layer-indicator[data-layer="other"] {
+      background: var(--other-color);
+      box-shadow: 0 0 12px var(--other-color);
     }
 
-    .layer-toggle-btn:first-child { border-radius: 10px 0 0 10px; }
+    .layer-indicator[data-layer="all"] {
+      background: linear-gradient(90deg, var(--self-color), var(--other-color));
+      box-shadow: 0 0 12px rgba(140, 130, 170, 0.6);
+    }
 
     /* Unified Filter Bar */
     .filter-bar {
@@ -498,69 +512,11 @@
     /* Matrix Containers Wrapper */
     .matrix-containers-wrapper {
       position: relative;
-      min-height: 320px;
+      min-height: 300px;
+      perspective: 1200px;
     }
 
-    /* All Matrix (全体表示) */
-    .all-matrix-container {
-      perspective: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      opacity: 0;
-      transform: scale(0.92) translateY(-10px);
-      pointer-events: none;
-      transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
-                  transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 0;
-    }
-
-    .all-matrix-container.active {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-      pointer-events: auto;
-      z-index: 10;
-    }
-
-    /* Layer container transition */
-    #layerMatrixContainer {
-      transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
-                  transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    #layerMatrixContainer.layer-hidden {
-      opacity: 0;
-      transform: scale(1.08) translateY(10px);
-      pointer-events: none;
-    }
-
-    .all-matrix-container .matrix-layer.all-matrix {
-      position: relative;
-      transform: none;
-      opacity: 1;
-      background: linear-gradient(135deg, rgba(15, 20, 40, 0.95) 0%, rgba(10, 15, 30, 0.92) 100%);
-      border: 2px solid var(--accent);
-      box-shadow: 0 12px 40px rgba(91, 143, 255, 0.15), 0 12px 40px rgba(212, 168, 85, 0.15);
-      border-radius: 12px;
-      padding: 12px;
-    }
-
-    .all-matrix .layer-title .dot.all {
-      background: linear-gradient(135deg, var(--self-color) 50%, var(--other-color) 50%);
-    }
-
-    /* Self/Other distinction in all matrix */
-    .all-matrix .project-dot.self-item .dot-inner {
-      border-color: var(--self-color);
-      box-shadow: 0 0 8px rgba(91, 143, 255, 0.3);
-    }
-
-    .all-matrix .project-dot.other-item .dot-inner {
-      border-color: var(--other-color);
-      box-shadow: 0 0 8px rgba(212, 168, 85, 0.3);
-    }
-
+    /* Matrix Scene - contains 2 layers that merge/separate */
     .matrix-scene {
       position: relative;
       height: 260px;
@@ -568,54 +524,119 @@
       transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Layer Focus States */
-    .matrix-scene[data-focus="self"] { transform: rotateY(0deg); }
-    .matrix-scene[data-focus="other"] { transform: rotateY(12deg); }
-
-    /* Matrix Layer */
+    /* Matrix Layer - Base styles */
     .matrix-layer {
       position: absolute;
       left: 0; right: 0; top: 0;
-      padding: 16px;
-      border-radius: 16px;
+      padding: 14px;
+      border-radius: 14px;
       transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
+      backface-visibility: hidden;
     }
 
-    /* Self Layer (Front) */
+    /* Self Layer (自分Matrix) */
     .matrix-layer.self {
-      z-index: 2;
-      background: linear-gradient(135deg, rgba(15, 25, 50, 0.92) 0%, rgba(10, 20, 40, 0.88) 100%);
-      border: 2px solid rgba(91, 143, 255, 0.5);
-      box-shadow: 0 12px 40px rgba(91, 143, 255, 0.2);
+      background: linear-gradient(135deg, rgba(15, 25, 50, 0.94) 0%, rgba(10, 20, 40, 0.90) 100%);
+      border: 2px solid rgba(91, 143, 255, 0.6);
+      box-shadow: 0 8px 32px rgba(91, 143, 255, 0.25);
     }
 
-    .matrix-scene[data-focus="self"] .matrix-layer.self {
-      transform: translateZ(60px) translateY(20px);
-      opacity: 1;
-    }
-
-    .matrix-scene[data-focus="other"] .matrix-layer.self {
-      transform: translateZ(-40px) translateY(0) scale(0.88);
-      opacity: 0.5;
-    }
-
-    /* Other Layer (Back - 座Matrix 間/関係性) */
+    /* Other Layer (座Matrix) */
     .matrix-layer.other {
-      z-index: 1;
-      background: linear-gradient(135deg, rgba(25, 22, 15, 0.92) 0%, rgba(20, 18, 12, 0.88) 100%);
-      border: 1px solid rgba(212, 168, 85, 0.5);
-      box-shadow: 0 12px 40px rgba(212, 168, 85, 0.2);
+      background: linear-gradient(135deg, rgba(30, 25, 15, 0.94) 0%, rgba(20, 18, 12, 0.90) 100%);
+      border: 2px solid rgba(212, 168, 85, 0.6);
+      box-shadow: 0 8px 32px rgba(212, 168, 85, 0.25);
     }
 
-    .matrix-scene[data-focus="self"] .matrix-layer.other {
-      transform: translateZ(-40px) translateY(0) scale(0.88);
-      opacity: 0.5;
-    }
-
-    .matrix-scene[data-focus="other"] .matrix-layer.other {
-      transform: translateZ(60px) translateY(20px);
+    /* ===== Focus: All (Default) - 両方が重なって統合ビュー ===== */
+    .matrix-scene[data-focus="all"] .matrix-layer.self {
+      transform: translateZ(5px) translateX(0) translateY(0);
       opacity: 1;
+      z-index: 2;
+      border-color: rgba(91, 143, 255, 0.4);
+      box-shadow: 0 4px 20px rgba(91, 143, 255, 0.15);
+    }
+    .matrix-scene[data-focus="all"] .matrix-layer.other {
+      transform: translateZ(0) translateX(0) translateY(0);
+      opacity: 1;
+      z-index: 1;
+      border-color: rgba(212, 168, 85, 0.5);
+      box-shadow: 0 4px 20px rgba(212, 168, 85, 0.15);
+    }
+    /* All mode: other layer dots slightly distinguished */
+    .matrix-scene[data-focus="all"] .matrix-layer.other .project-dot {
+      opacity: 0.85;
+    }
+
+    /* ===== Focus: Self - 自分Matrixが抽出されて前面に ===== */
+    .matrix-scene[data-focus="self"] .matrix-layer.self {
+      transform: translateZ(50px) translateX(-8%) translateY(15px) scale(1.02);
+      opacity: 1;
+      z-index: 10;
+      border-color: rgba(91, 143, 255, 0.8);
+      box-shadow: 0 16px 48px rgba(91, 143, 255, 0.35);
+    }
+    .matrix-scene[data-focus="self"] .matrix-layer.other {
+      transform: translateZ(-30px) translateX(15%) translateY(-5px) scale(0.85);
+      opacity: 0.25;
+      z-index: 1;
+      filter: blur(1px) saturate(0.5);
+    }
+
+    /* ===== Focus: Other - 座Matrixが抽出されて前面に ===== */
+    .matrix-scene[data-focus="other"] .matrix-layer.self {
+      transform: translateZ(-30px) translateX(-15%) translateY(-5px) scale(0.85);
+      opacity: 0.25;
+      z-index: 1;
+      filter: blur(1px) saturate(0.5);
+    }
+    .matrix-scene[data-focus="other"] .matrix-layer.other {
+      transform: translateZ(50px) translateX(8%) translateY(15px) scale(1.02);
+      opacity: 1;
+      z-index: 10;
+      border-color: rgba(212, 168, 85, 0.8);
+      box-shadow: 0 16px 48px rgba(212, 168, 85, 0.35);
+    }
+
+    /* Unified Title (for All view) */
+    .unified-title {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #a0a0c0;
+      z-index: 20;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+
+    .unified-title .dot.all {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--self-color) 50%, var(--other-color) 50%);
+      box-shadow: 0 0 12px rgba(140, 130, 170, 0.6);
+      animation: pulse 2s infinite;
+    }
+
+    /* Show unified title in All view */
+    .matrix-scene[data-focus="all"] .unified-title {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Hide individual layer titles in All view */
+    .matrix-scene[data-focus="all"] .layer-title {
+      opacity: 0;
+      transform: translateY(-5px);
     }
 
     /* Layer Title */
@@ -628,6 +649,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .matrix-layer.self .layer-title { color: var(--self-color); }
@@ -1641,7 +1663,7 @@
     <div class="header-content">
       <div class="header-logo">
         <img src="座.png" alt="座">
-        <h1>Fintech Project Map</h1>
+        <h1>Fintech Headmap</h1>
       </div>
       <div class="header-actions">
         <span class="data-source" id="dataSource">-</span>
@@ -1652,20 +1674,23 @@
     </div>
   </header>
 
-  <!-- Layer Toggle -->
-  <nav class="layer-toggle">
-    <button class="layer-toggle-btn" data-layer="all">
-      <span class="dot all"></span>
-      <span>全体</span>
-    </button>
-    <button class="layer-toggle-btn active" data-layer="self">
-      <span class="dot"></span>
-      <span>自分Matrix</span>
-    </button>
-    <button class="layer-toggle-btn" data-layer="other">
-      <span class="dot"></span>
-      <span>座Matrix</span>
-    </button>
+  <!-- Layer Toggle with Indicator -->
+  <nav class="layer-toggle-wrapper">
+    <div class="layer-toggle">
+      <button class="layer-toggle-btn" data-layer="self">
+        <span class="dot"></span>
+        <span>自分</span>
+      </button>
+      <button class="layer-toggle-btn active" data-layer="all">
+        <span class="dot all"></span>
+        <span>全体</span>
+      </button>
+      <button class="layer-toggle-btn" data-layer="other">
+        <span class="dot"></span>
+        <span>座</span>
+      </button>
+    </div>
+    <div class="layer-indicator" id="layerIndicator"></div>
   </nav>
 
   <!-- Unified Filter Bar -->
@@ -1693,45 +1718,18 @@
     </div>
   </div>
 
-  <!-- Matrix Containers Wrapper (for seamless transitions) -->
+  <!-- Matrix Containers Wrapper -->
   <div class="matrix-containers-wrapper" id="matrixWrapper">
-  <!-- All Matrix (全体表示) -->
-  <section class="matrix-container all-matrix-container" id="allMatrixContainer">
-    <div class="matrix-layer all-matrix" id="allMatrix">
-      <div class="layer-title"><span class="dot all"></span> 全体Matrix</div>
-      <div class="matrix-wrapper">
-        <div class="y-axis">
-          <span class="y-axis-title">重要度</span>
-          <div class="y-axis-arrow">
-            <span class="axis-arrow">↑</span>
-            <span class="axis-high">高</span>
-          </div>
-        </div>
-        <div class="matrix-main">
-          <div class="matrix-plot" id="allMatrixPlot">
-            <div class="quadrant-labels">
-              <span class="quadrant-label tl">DESIGN / MONITOR</span>
-              <span class="quadrant-label tr">FIRE / WATCH</span>
-              <span class="quadrant-label bl">EPOCHÉ / SEED</span>
-              <span class="quadrant-label br">QUICK / DELEGATE</span>
-            </div>
-          </div>
-          <div class="x-axis">
-            <div class="x-axis-arrow">
-              <span class="axis-high">高</span>
-              <span class="axis-arrow">→</span>
-            </div>
-            <div class="x-axis-title">緊急度</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- Matrix Visualization - 2 Layers (Self + Other) -->
+  <section class="matrix-container" id="matrixContainer">
+    <div class="matrix-scene" id="matrixScene" data-focus="all">
 
-  <!-- Matrix Visualization -->
-  <section class="matrix-container" id="layerMatrixContainer">
-    <div class="matrix-scene" id="matrixScene" data-focus="self">
-      <!-- Other Layer (座Matrix - 間/関係性) -->
+      <!-- Unified Title (shown only in All view) -->
+      <div class="unified-title" id="unifiedTitle">
+        <span class="dot all"></span> 全体Matrix
+      </div>
+
+      <!-- Other Layer (Back - 座Matrix 間/関係性) -->
       <div class="matrix-layer other" id="otherMatrix">
         <div class="layer-title"><span class="dot"></span> 座Matrix</div>
         <div class="matrix-wrapper">
@@ -1760,7 +1758,7 @@
         </div>
       </div>
 
-      <!-- Self Layer (自分Matrix) -->
+      <!-- Self Layer (Front - 自分Matrix) -->
       <div class="matrix-layer self" id="selfMatrix">
         <div class="layer-title"><span class="dot"></span> 自分Matrix</div>
         <div class="matrix-wrapper">
@@ -1790,6 +1788,7 @@
           </div>
         </div>
       </div>
+
     </div>
   </section>
   </div><!-- End of matrix-containers-wrapper -->
@@ -2070,7 +2069,7 @@
     const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1omNh7Jfmb2uf5ant19-8oJhTDXfBiOEdEVgLFxvZ3xk/edit?gid=0#gid=0';
 
     let items = [];
-    let currentLayerFocus = 'self';
+    let currentLayerFocus = 'all';
     let currentCategory = '';
     let showNewOnly = false;
     let showUpdatedOnly = false;
@@ -2228,26 +2227,34 @@
     function setLayerFocus(layer) {
       currentLayerFocus = layer;
 
-      const allContainer = document.getElementById('allMatrixContainer');
-      const layerContainer = document.getElementById('layerMatrixContainer');
       const matrixScene = document.getElementById('matrixScene');
 
-      if (layer === 'all') {
-        // Seamless transition to all matrix
-        layerContainer.classList.add('layer-hidden');
-        allContainer.classList.add('active');
-      } else {
-        // Seamless transition to layer view
-        allContainer.classList.remove('active');
-        layerContainer.classList.remove('layer-hidden');
-        matrixScene.dataset.focus = layer;
-      }
+      // Update matrix focus
+      matrixScene.dataset.focus = layer;
 
+      // Update tab states
       document.querySelectorAll('.layer-toggle-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.layer === layer);
       });
 
+      // Update sliding indicator
+      updateLayerIndicator(layer);
+
       renderMatrix();
+    }
+
+    function updateLayerIndicator(layer) {
+      const indicator = document.getElementById('layerIndicator');
+      const activeBtn = document.querySelector(`.layer-toggle-btn[data-layer="${layer}"]`);
+
+      if (indicator && activeBtn) {
+        const btnRect = activeBtn.getBoundingClientRect();
+        const wrapperRect = activeBtn.parentElement.getBoundingClientRect();
+
+        indicator.style.left = (activeBtn.offsetLeft) + 'px';
+        indicator.style.width = activeBtn.offsetWidth + 'px';
+        indicator.dataset.layer = layer;
+      }
     }
 
     function setCategoryFilter(category) {
@@ -2495,44 +2502,9 @@
       `;
     }
 
-    function renderProjectDotForAll(item, bounds, positions) {
-      const relativeStatus = getRelativeStatus(item, bounds);
-      const config = STATUS_CONFIG[relativeStatus];
-      // Use pre-calculated position with offset
-      const pos = positions.get(item.id) || getScorePosition(item, bounds);
-      const { x, y } = pos;
-      const shortName = item.shortName || item.title.slice(0, 6);
-      const urgency = item.urgencyScore ?? 50;
-      const importance = item.importanceScore ?? 50;
-      const isNew = isNewItem(item);
-      const hasUpdate = item.hasUpdate === true;
-      const layerClass = item.layer === 'self' ? 'self-item' : 'other-item';
-      const layerIcon = item.layer === 'self' ? '◆' : '◇';
-
-      return `
-        <div class="project-dot ${layerClass} ${hasUpdate ? 'has-update' : ''}" data-id="${item.id}"
-             style="left: ${x}%; top: ${y}%;">
-          <div class="dot-inner ${relativeStatus.toLowerCase()}">
-            ${isNew ? '<span class="dot-new">NEW</span>' : ''}
-            ${hasUpdate ? '<span class="dot-update">🔔</span>' : ''}
-            <span class="dot-emoji">${config.emoji}</span>
-            <span class="dot-name">${escapeHtml(shortName)}</span>
-            <span class="dot-score">重${importance} / 緊${urgency}</span>
-            <div class="dot-details">
-              <span class="dot-layer-badge">${layerIcon} ${item.layer === 'self' ? '自分' : '座'}</span>
-              ${item.category ? `<span class="dot-category">${escapeHtml(item.category)}</span>` : ''}
-              ${item.person ? `👤 ${escapeHtml(item.person)}` : ''}
-              ${item.updateDetail ? `<div class="dot-update-detail">💬 ${escapeHtml(item.updateDetail)}</div>` : ''}
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
     function renderMatrix() {
       const selfPlot = document.getElementById('selfMatrixPlot');
       const otherPlot = document.getElementById('otherMatrixPlot');
-      const allPlot = document.getElementById('allMatrixPlot');
 
       // Apply category filter
       let filteredItems = currentCategory
@@ -2575,21 +2547,6 @@
       const selfPositions = calculatePositionsWithOffset(selfItems, selfBounds);
       const otherPositions = calculatePositionsWithOffset(otherItems, otherBounds);
 
-      // Render All Matrix (全体)
-      if (currentLayerFocus === 'all') {
-        const allBounds = calculateScaleBounds(filteredItems);
-        const allPositions = calculatePositionsWithOffset(filteredItems, allBounds);
-        const allLabels = allPlot.querySelector('.quadrant-labels').outerHTML;
-
-        if (filteredItems.length > 0) {
-          const dividers = renderQuadrantDividers(allBounds, 'all');
-          const dots = filteredItems.map(i => renderProjectDotForAll(i, allBounds, allPositions)).join('');
-          allPlot.innerHTML = allLabels + dividers + dots;
-        } else {
-          allPlot.innerHTML = allLabels + '<div class="plot-empty">アイテムなし</div>';
-        }
-      }
-
       // Preserve quadrant labels
       const selfLabels = selfPlot.querySelector('.quadrant-labels').outerHTML;
       const otherLabels = otherPlot.querySelector('.quadrant-labels').outerHTML;
@@ -2622,10 +2579,11 @@
         });
       });
 
-      // Layer click to switch focus
-      document.querySelectorAll('.matrix-layer:not(.all-matrix)').forEach(layer => {
+      // Layer click to switch focus (only for self/other focus modes)
+      document.querySelectorAll('.matrix-layer').forEach(layer => {
         layer.addEventListener('click', (e) => {
           if (e.target.closest('.project-dot')) return;
+          // In 'all' mode, clicking a layer focuses it
           const targetLayer = layer.classList.contains('self') ? 'self' : 'other';
           setLayerFocus(targetLayer);
         });
@@ -3461,6 +3419,10 @@
       document.getElementById('inputUrgency').addEventListener('input', (e) => {
         document.getElementById('urgencyValue').textContent = e.target.value;
       });
+
+      // Initialize layer indicator position
+      setTimeout(() => updateLayerIndicator(currentLayerFocus), 100);
+      window.addEventListener('resize', () => updateLayerIndicator(currentLayerFocus));
 
       loadData();
     });
