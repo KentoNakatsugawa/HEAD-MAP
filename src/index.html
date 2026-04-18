@@ -549,24 +549,26 @@
       box-shadow: 0 8px 32px rgba(212, 168, 85, 0.25);
     }
 
-    /* ===== Focus: All (Default) - 両方が重なって統合ビュー ===== */
+    /* ===== Focus: All (Default) - 両方を左右に並べて統合ビュー ===== */
     .matrix-scene[data-focus="all"] .matrix-layer.self {
-      transform: translateZ(5px) translateX(0) translateY(0);
+      transform: translateZ(20px) translateX(-25%) translateY(0) scale(0.52);
       opacity: 1;
       z-index: 2;
-      border-color: rgba(91, 143, 255, 0.4);
-      box-shadow: 0 4px 20px rgba(91, 143, 255, 0.15);
+      border-color: rgba(91, 143, 255, 0.6);
+      box-shadow: 0 8px 24px rgba(91, 143, 255, 0.25);
     }
     .matrix-scene[data-focus="all"] .matrix-layer.other {
-      transform: translateZ(0) translateX(0) translateY(0);
+      transform: translateZ(20px) translateX(25%) translateY(0) scale(0.52);
       opacity: 1;
-      z-index: 1;
-      border-color: rgba(212, 168, 85, 0.5);
-      box-shadow: 0 4px 20px rgba(212, 168, 85, 0.15);
+      z-index: 2;
+      border-color: rgba(212, 168, 85, 0.6);
+      box-shadow: 0 8px 24px rgba(212, 168, 85, 0.25);
     }
-    /* All mode: other layer dots slightly distinguished */
-    .matrix-scene[data-focus="all"] .matrix-layer.other .project-dot {
-      opacity: 0.85;
+    /* All mode: show individual layer titles */
+    .matrix-scene[data-focus="all"] .matrix-layer .layer-title {
+      opacity: 1;
+      transform: translateY(0);
+      font-size: 0.65rem;
     }
 
     /* ===== Focus: Self - 自分Matrixが抽出されて前面に ===== */
@@ -627,16 +629,10 @@
       animation: pulse 2s infinite;
     }
 
-    /* Show unified title in All view */
+    /* Hide unified title (we show individual layer titles instead) */
     .matrix-scene[data-focus="all"] .unified-title {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Hide individual layer titles in All view */
-    .matrix-scene[data-focus="all"] .layer-title {
       opacity: 0;
-      transform: translateY(-5px);
+      transform: translateY(-10px);
     }
 
     /* Layer Title */
@@ -2951,9 +2947,9 @@
         else if (header.includes('緊急') || lower === 'urgency' || lower === 'urgencyscore') headerMap.urgency = i;
         else if (lower === 'person' || header.includes('関係者') || header.includes('担当') || header.includes('移譲先')) headerMap.person = i;
         else if (lower === 'memo' || header.includes('メモ') || header.includes('備考') || header.includes('詳細')) headerMap.memo = i;
-        else if (lower === 'new' || lower === 'isnew' || lower === 'new flag' || lower === 'newflag' || header.includes('new flag') || header.includes('NEW')) headerMap.isNew = i;
+        else if (lower === 'new' || lower === 'isnew' || lower === 'new flag' || lower === 'newflag' || lower.includes('new flag') || lower.includes('new')) headerMap.isNew = i;
         else if (lower === 'category' || header.includes('カテゴリ') || header.includes('分類')) headerMap.category = i;
-        else if (lower === 'update flag' || lower === 'updateflag' || lower === 'updated flag' || lower === 'updatedflag' || header.includes('update flag') || header.includes('updated flag') || header.includes('更新フラグ')) headerMap.hasUpdate = i;
+        else if (lower === 'update flag' || lower === 'updateflag' || lower === 'updated flag' || lower === 'updatedflag' || lower.includes('update flag') || lower.includes('update') || header.includes('更新フラグ')) headerMap.hasUpdate = i;
         else if (lower === 'update detail' || lower === 'updatedetail' || header.includes('update detail') || header.includes('相談内容') || header.includes('更新内容')) headerMap.updateDetail = i;
       });
 
