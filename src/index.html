@@ -3757,7 +3757,8 @@
 
     async function fetchFromSpreadsheet() {
       const urlInput = document.getElementById('sheetUrl');
-      const url = urlInput.value.trim();
+      // Use input value if available, otherwise use saved URL
+      const url = (urlInput && urlInput.value.trim()) || localStorage.getItem(SHEET_URL_KEY) || DEFAULT_SHEET_URL;
 
       if (!url) {
         showToast('スプレッドシートのURLを入力してください', 'error');
@@ -3817,11 +3818,16 @@
           return;
         }
 
+        // Debug: count hasUpdate items
+        const updateCount = newItems.filter(i => i.hasUpdate === true).length;
+        console.log(`Fetched ${newItems.length} items, ${updateCount} with hasUpdate=true`);
+        console.log('Items with hasUpdate:', newItems.filter(i => i.hasUpdate).map(i => i.title));
+
         items = newItems;
         dataSource = 'sheet';
         saveToLocalStorage();
         render();
-        showToast(`${newItems.length}件のアイテムを取得しました`, 'success');
+        showToast(`${newItems.length}件のアイテムを取得しました（相談: ${updateCount}件）`, 'success');
         closeModal(document.getElementById('settingsModal'));
       } catch (err) {
         console.error('Spreadsheet fetch error:', err);
