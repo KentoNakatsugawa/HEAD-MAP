@@ -3705,11 +3705,6 @@
         const hasUpdateLower = hasUpdateRaw.toLowerCase();
         const hasUpdate = hasUpdateLower === 'true' || hasUpdateLower === '1' || hasUpdateLower === 'yes' || hasUpdateRaw === '✓' || hasUpdateRaw === '○';
 
-        // Debug first 3 rows
-        if (i <= 3) {
-          alert(`Row ${i}: title="${title}", hasUpdateCol=${headerMap.hasUpdate}, hasUpdateRaw="${hasUpdateRaw}", hasUpdate=${hasUpdate}`);
-        }
-
         newItems.push({
           id: id,
           title: title,
